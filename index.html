@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BizEd tools</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="shell">
+
+    <header class="site-header">
+      <div class="wordmark">BizEd tools</div>
+    </header>
+
+    <div class="tool-tabs" role="tablist">
+      <button class="tool-tab active" id="tab-checker" role="tab"
+              aria-selected="true" onclick="switchTool('checker')">
+        Alumni list checker
+      </button>
+
+      <button class="tool-tab" id="tab-responserates" role="tab"
+              aria-selected="false" onclick="switchTool('responserates')">
+        Response rates
+      </button>
+    </div>
+
+    <!-- Alumni list checker -->
+    <div id="panel-checker" class="tool-panel active" role="tabpanel">
+
+      <div class="card" id="checker-upload-card">
+        <p class="section-label">Step 1 — Upload spreadsheet</p>
+
+        <div class="upload-zone" id="checker-drop-zone">
+          <svg width="32" height="32" fill="none" stroke="currentColor"
+               stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0
+                     0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+
+          <div class="uz-title">Drop your alumni file here, or click to browse</div>
+          <div class="uz-hint">Supports .xlsx, .xls and .csv</div>
+        </div>
+
+        <input type="file" id="checker-file-input" accept=".xlsx,.xls,.csv" />
+      </div>
+
+      <div class="card hidden" id="card-config">
+        <p class="section-label">Step 2 — Map columns</p>
+
+        <div id="file-badge-area"></div>
+
+        <div class="col-map-grid">
+          <div class="field-group">
+            <label>School name column</label>
+            <select id="col-school"></select>
+          </div>
+
+          <div class="field-group">
+            <label>School ID column</label>
+            <select id="col-sid"></select>
+          </div>
+
+          <div class="field-group">
+            <label>Main email column</label>
+            <select id="col-email"></select>
+          </div>
+
+          <div class="field-group">
+            <label>Alternate email column</label>
+            <select id="col-alt"></select>
+          </div>
+        </div>
+
+        <div class="banner banner-danger hidden" id="err-banner">
+          <svg width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="err-text"></span>
+        </div>
+
+        <button class="btn-primary" id="run-btn" onclick="runChecks()">
+          Run checks &amp; generate emails
+        </button>
+
+        <div class="status-bar hidden" id="status-bar">
+          <div class="spinner"></div>
+          <span id="status-text">Analysing…</span>
+        </div>
+      </div>
+
+      <div class="hidden" id="results-section">
+        <div class="stats-row" id="stats-row"></div>
+        <div id="results-area"></div>
+
+        <button class="btn-secondary" onclick="resetChecker()" style="margin-top:4px;">
+          Start over
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Response rates -->
+    <div id="panel-responserates" class="tool-panel" role="tabpanel">
+
+      <div class="card" id="responserates-upload-card">
+        <p class="section-label">Step 1 — Upload spreadsheet</p>
+
+        <div class="upload-zone" id="responserates-drop-zone">
+          <svg width="32" height="32" fill="none" stroke="currentColor"
+               stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0
+                     0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+
+          <div class="uz-title">Drop your response rates file here, or click to browse</div>
+          <div class="uz-hint">Supports .xlsx, .xls and .csv</div>
+        </div>
+
+        <input type="file" id="responserates-file-input" accept=".xlsx,.xls,.csv" />
+      </div>
+
+      <div class="hidden" id="responserates-results-section">
+        <div class="stats-row" id="responserates-stats-row"></div>
+        <div id="responserates-results-area"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/tools/checker.js"></script>
+  <script src="js/tools/responserates.js"></script>
+</body>
+</html>

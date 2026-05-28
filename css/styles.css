@@ -1,0 +1,644 @@
+/* ================================================================
+   DESIGN TOKENS
+   These three variables control the entire colour palette.
+   Change --brand, --brand-dark, and --brand-text to retheme
+   the whole app without touching anything else.
+   ================================================================ */
+:root {
+  --brand:        #F3DECD;            /* main background + accent fills  */
+  --brand-dark:   #c9a88c;            /* borders, hover states           */
+  --brand-text:   #5c3d24;            /* text that sits on brand colour  */
+
+  /* Neutral ink scale */
+  --ink:          #1a1612;
+  --ink-mid:      #5a524a;
+  --ink-light:    #9b9088;
+
+  /* Surface scale (warm whites) */
+  --surface:      #ffffff;
+  --surface-alt:  #fdf8f4;
+  --surface-deep: #f5ede4;
+
+  /* Borders */
+  --border:       rgba(92, 61, 36, 0.15);
+  --border-strong:rgba(92, 61, 36, 0.30);
+
+  /* Semantic colours */
+  --success-bg:   #edf7f0;
+  --success-text: #1e6637;
+  --danger-bg:    #fdecea;
+  --danger-text:  #9b2020;
+
+  /* Shape */
+  --radius:       10px;
+  --radius-lg:    16px;
+  --shadow:       0 2px 16px rgba(92, 61, 36, 0.10);
+
+  /* Typography */
+  --font-serif:   'Lora', Georgia, serif;
+  --font-sans:    'DM Sans', sans-serif;
+  --font-mono:    'Courier New', Courier, monospace;
+}
+
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--brand);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+.shell {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ================================================================
+   SITE HEADER
+   ================================================================ */
+.site-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.site-header .wordmark {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--brand-text);
+  letter-spacing: -0.01em;
+}
+
+.site-header .tagline {
+  font-size: 14px;
+  color: var(--brand-text);
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ================================================================
+   CARDS
+   ================================================================ */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 1.75rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ================================================================
+   TOOL TABS
+   ================================================================ */
+.tool-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--surface-deep);
+  border-radius: var(--radius);
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  border: 0.5px solid var(--border);
+}
+
+.tool-tab {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.tool-tab:hover {
+  background: var(--brand);
+  color: var(--brand-text);
+}
+
+.tool-tab.active {
+  background: var(--brand);
+  color: var(--brand-text);
+  border: 0.5px solid var(--brand-dark);
+}
+
+/* ================================================================
+   TOOL PANELS
+   ================================================================ */
+.tool-panel          { display: none; }
+.tool-panel.active   { display: block; }
+
+/* ================================================================
+   UPLOAD ZONE
+   ================================================================ */
+.upload-zone {
+  border: 1.5px dashed var(--brand-dark);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface-alt);
+  transition: background 0.15s;
+  margin-bottom: 1.25rem;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  background: var(--brand);
+}
+
+.upload-zone svg {
+  display: block;
+  margin: 0 auto 12px;
+  opacity: 0.5;
+}
+
+.upload-zone .uz-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.upload-zone .uz-hint {
+  font-size: 13px;
+  color: var(--ink-light);
+}
+
+#file-input { display: none; }
+
+/* ================================================================
+   FILE BADGE
+   ================================================================ */
+.file-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand);
+  border: 0.5px solid var(--brand-dark);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--brand-text);
+  margin-bottom: 1.25rem;
+}
+
+.file-badge .rm {
+  cursor: pointer;
+  color: var(--brand-dark);
+  margin-left: 4px;
+  line-height: 1;
+}
+
+.file-badge .rm:hover { color: var(--danger-text); }
+
+/* ================================================================
+   COLUMN MAPPING GRID
+   ================================================================ */
+.col-map-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.field-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ================================================================
+   FORM ELEMENTS
+   ================================================================ */
+select,
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  appearance: none;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+select:focus,
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--brand-dark);
+  box-shadow: 0 0 0 3px rgba(243, 222, 205, 0.5);
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border-radius: var(--radius);
+  background: var(--brand-text);
+  color: var(--brand);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover   { opacity: 0.88; }
+.btn-primary:active  { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  font-family: var(--font-sans);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-mid);
+  border: 0.5px solid var(--border-strong);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-secondary:hover { background: var(--surface-deep); }
+
+/* ================================================================
+   STATUS BAR & SPINNER
+   ================================================================ */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-mid);
+  margin-top: 0.75rem;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--brand-text);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ================================================================
+   SUMMARY STATS
+   ================================================================ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.stat-box {
+  background: var(--surface-alt);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.stat-box .n {
+  font-size: 26px;
+  font-weight: 500;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+
+.stat-box .lbl {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-top: 2px;
+}
+
+/* ================================================================
+   BANNERS (success / danger)
+   ================================================================ */
+.banner {
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.banner svg { flex-shrink: 0; margin-top: 1px; }
+
+.banner-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 0.5px solid rgba(30, 102, 55, 0.2);
+}
+
+.banner-danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 0.5px solid rgba(155, 32, 32, 0.2);
+}
+
+/* ================================================================
+   RESULT CARDS (email output)
+   ================================================================ */
+.result-card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.result-header {
+  padding: 12px 16px;
+  background: var(--surface-alt);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.result-header:hover { background: var(--brand); }
+
+.result-school {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.issue-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--brand);
+  color: var(--brand-text);
+  border: 0.5px solid var(--brand-dark);
+}
+
+.result-body {
+  padding: 16px;
+  background: var(--surface);
+  border-top: 0.5px solid var(--border);
+}
+
+.email-subject-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.email-subject-val {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.email-pre {
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  line-height: 1.65;
+  color: var(--ink-mid);
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.chevron { transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+
+/* ================================================================
+   SECTION LABEL
+   ================================================================ */
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
+/* ================================================================
+   DEVELOPER DOCS PANEL
+   ================================================================ */
+.docs-section h2 {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.docs-section p,
+.docs-section li {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink-mid);
+}
+
+.docs-section ul {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.docs-section h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 1.5rem 0 0.4rem;
+}
+
+.docs-section code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--surface-deep);
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--brand-text);
+}
+
+.docs-section pre {
+  background: var(--ink);
+  color: #f3decd;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+  line-height: 1.65;
+  overflow-x: auto;
+  margin: 0.75rem 0 1rem;
+  white-space: pre;
+}
+
+.docs-divider {
+  border: none;
+  border-top: 0.5px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--brand-text);
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+/* ================================================================
+   UTILITY
+   ================================================================ */
+.hidden { display: none !important; }
+
+.subject-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.copy-btn {
+  white-space: nowrap;
+}
+
+.email-box {
+  position: relative;
+}
+
+.copy-email-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
+.email-box .email-pre {
+  padding-top: 48px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.results-table th,
+.results-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.results-table th {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-top-color: rgba(0,0,0,0.65);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-top-color: rgba(0,0,0,0.65);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
