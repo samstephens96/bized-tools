@@ -30,16 +30,31 @@ function cleanEmail(value) {
     .trim();
 }
 
+function normaliseSid(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\.0$/, '');
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function populateColumnMapping(filename) {
   document.getElementById('file-badge-area').innerHTML = `
     <div class="file-badge">
-      <span>${filename}</span>
+      <span>${escapeHtml(filename)}</span>
       <span class="rm" onclick="resetChecker()">&times;</span>
     </div>
   `;
 
   const options = fileHeaders
-    .map(h => `<option value="${h}">${h}</option>`)
+    .map(h => `<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`)
     .join('');
 
   ['col-school', 'col-sid', 'col-email', 'col-alt'].forEach(id => {
@@ -80,7 +95,7 @@ function runChecks() {
   const schoolCounters = {};
 
   const rows = parsedRows.map(row => {
-    const sid = String(row[colSid] || '').trim();
+    const sid = normaliseSid(row[colSid]);
 
     if (!schoolCounters[sid]) {
       schoolCounters[sid] = 0;
@@ -247,6 +262,22 @@ function renderCheckerResults(result, rows) {
       <div class="n">${affectedSchools}</div>
       <div class="lbl">Schools affected</div>
     </div>
+
+    <div class="stat-box stat-btn-box" onclick="resetChecker()">
+      <div class="n">↺</div>
+      <div class="lbl">Start over</div>
+    </div>
+
+    <div class="stat-box stat-btn-box" onclick="checkMissingAlumniLists()">
+      <div class="n">
+        <svg width="22" height="22" fill="none" stroke="currentColor"
+             stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+      <div class="lbl">Missing alumni lists</div>
+    </div>
   `;
 
   const area = document.getElementById('results-area');
@@ -266,15 +297,15 @@ function renderCheckerResults(result, rows) {
     return `
       <div class="result-card">
         <div class="result-header" onclick="toggleCheckerCard(${idx})">
-          <span class="result-school">${em.school}</span>
+          <span class="result-school">${escapeHtml(em.school)}</span>
           <span class="issue-badge">${issueCount} issue(s)</span>
         </div>
 
-        <div class="result-body" id="checker-card-body-${idx}">
+        <div class="result-body" id="checker-card-body-${idx}" style="display:none;">
           <div class="subject-row">
             <div>
               <div class="email-subject-label">Subject</div>
-              <div class="email-subject-val" id="checker-email-subject-${idx}">${em.subject}</div>
+              <div class="email-subject-val" id="checker-email-subject-${idx}">${escapeHtml(em.subject)}</div>
             </div>
 
             <button class="btn-secondary copy-btn" onclick="copyCheckerSubject(event, ${idx})">
@@ -287,7 +318,7 @@ function renderCheckerResults(result, rows) {
               Copy email
             </button>
 
-            <div class="email-pre" id="checker-email-pre-${idx}">${em.body}</div>
+            <div class="email-pre" id="checker-email-pre-${idx}">${escapeHtml(em.body)}</div>
           </div>
         </div>
       </div>
@@ -297,6 +328,172 @@ function renderCheckerResults(result, rows) {
 
 function toggleCheckerCard(idx) {
   const body = document.getElementById('checker-card-body-' + idx);
+
+  if (!body) return;
+
+  body.style.display =
+    body.style.display === 'none'
+      ? ''
+      : 'none';
+}
+
+function checkMissingAlumniLists() {
+  if (!parsedRows.length) {
+    showBanner('err-banner', 'Upload and check an alumni list first.');
+    return;
+  }
+
+  const modal = document.createElement('div');
+
+  modal.id = 'tracker-upload-modal';
+  modal.className = 'modal-backdrop';
+
+  modal.innerHTML = `
+    <div class="modal-card">
+      <h3>Upload tracker spreadsheet</h3>
+
+      <p>
+        Please upload this year’s tracker spreadsheet. The checker will use the first sheet only.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeTrackerUploadModal()">
+          Cancel
+        </button>
+
+        <button class="btn-primary" onclick="openTrackerFilePicker()">
+          Choose tracker file
+        </button>
+      </div>
+
+      <input type="file"
+             id="tracker-file-input"
+             accept=".xlsx,.xls,.csv"
+             style="display:none;" />
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('tracker-file-input').addEventListener('change', event => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    closeTrackerUploadModal();
+
+    readSpreadsheetFile(
+      file,
+      ({ rows }) => {
+        runMissingAlumniListCheck(rows);
+      },
+      err => {
+        showBanner('err-banner', err.message);
+      }
+    );
+  });
+}
+
+function openTrackerFilePicker() {
+  document.getElementById('tracker-file-input').click();
+}
+
+function closeTrackerUploadModal() {
+  const modal = document.getElementById('tracker-upload-modal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function runMissingAlumniListCheck(trackerRows) {
+  hideBanner('err-banner');
+
+  const originalSidColumn = fileHeaders.find(header =>
+    normaliseHeader(header).includes('ft school id')
+  );
+
+  if (!originalSidColumn) {
+    showBanner('err-banner', 'Could not find FT School ID column in the uploaded alumni list.');
+    return;
+  }
+
+  const submittedSids = new Set(
+    parsedRows
+      .map(row => normaliseSid(row[originalSidColumn]))
+      .filter(Boolean)
+  );
+
+  const missing = [];
+
+  trackerRows.forEach(row => {
+    const values = Object.values(row);
+
+    const sid = normaliseSid(values[0]);
+    const school = String(values[1] || '').trim();
+    const takingPart = String(values[2] || '').trim().toLowerCase();
+
+    if (takingPart === 'y' && sid && !submittedSids.has(sid)) {
+      missing.push({
+        sid,
+        school
+      });
+    }
+  });
+
+  renderMissingAlumniLists(missing);
+}
+
+function renderMissingAlumniLists(missing) {
+  const area = document.getElementById('results-area');
+
+  const existing = document.getElementById('missing-alumni-lists-card');
+
+  if (existing) {
+    existing.remove();
+  }
+
+  if (!missing.length) {
+    area.insertAdjacentHTML('afterbegin', `
+      <div class="result-card" id="missing-alumni-lists-card">
+        <div class="result-header" onclick="toggleMissingAlumniLists()">
+          <span class="result-school">Missing alumni lists</span>
+          <span class="issue-badge">0 missing</span>
+        </div>
+
+        <div class="result-body" id="missing-alumni-lists-body" style="display:none;">
+          <div class="banner banner-success">
+            <span>All schools marked as taking part have submitted a list.</span>
+          </div>
+        </div>
+      </div>
+    `);
+
+    return;
+  }
+
+  area.insertAdjacentHTML('afterbegin', `
+    <div class="result-card" id="missing-alumni-lists-card">
+      <div class="result-header" onclick="toggleMissingAlumniLists()">
+        <span class="result-school">Missing alumni lists</span>
+        <span class="issue-badge">${missing.length} missing</span>
+      </div>
+
+      <div class="result-body" id="missing-alumni-lists-body" style="display:none;">
+        <div class="email-pre">
+          ${missing
+            .map(item => `${escapeHtml(item.school)} have not submitted a list.`)
+            .join('<br>')}
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+function toggleMissingAlumniLists() {
+  const body = document.getElementById('missing-alumni-lists-body');
+
+  if (!body) return;
 
   body.style.display =
     body.style.display === 'none'
