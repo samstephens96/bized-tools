@@ -411,7 +411,7 @@ function renderFacultyResults(results) {
     </div>
 
     <div class="stat-box stat-btn-box" onclick="openFacultyRrUpload()">
-      <div class="n">−</div>
+      <div class="n">×</div>
       <div class="lbl">Remove schools that haven't made RR</div>
     </div>
   `;
