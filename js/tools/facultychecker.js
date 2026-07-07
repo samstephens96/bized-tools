@@ -567,7 +567,6 @@ function renderFacultyAsiaDuplicateReview() {
             </div>
 
             <div class="asia-review-actions">
-
               <button
                 type="button"
                 class="copy-name-btn"
@@ -581,7 +580,6 @@ function renderFacultyAsiaDuplicateReview() {
                   data-full-name="${facultyEscapeHtml(item.fullName)}">
                 Remove
               </label>
-
             </div>
 
           </div>
