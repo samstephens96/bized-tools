@@ -31,7 +31,16 @@ function switchTool(name) {
   if (panel) {
     panel.classList.add('active');
   }
+  const header = document.querySelector('.site-header');
+const tabs = document.getElementById('tool-tabs');
 
+if (name === 'home') {
+    header.style.display = 'none';
+    tabs.style.display = 'none';
+} else {
+    header.style.display = '';
+    tabs.style.display = 'flex';
+}
   // Remember the selected tab
   localStorage.setItem('selectedToolTab', name);
   history.replaceState(null, '', '#' + name);

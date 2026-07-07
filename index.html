@@ -21,26 +21,28 @@
       <div class="wordmark">BizEd Tools</div>
     </header>
 
-    <button class="tool-tab active" id="tab-home" role="tab"
-            aria-selected="true" onclick="switchTool('home')">
-      Home
-    </button>
+   <div class="tool-tabs" id="tool-tabs" role="tablist">
 
-    <div class="tool-tabs" role="tablist">
-      <button class="tool-tab active" id="tab-checker" role="tab"
-              aria-selected="true" onclick="switchTool('checker')">
+      <button class="tool-tab active" id="tab-home"
+              onclick="switchTool('home')">
+        Home
+      </button>
+
+      <button class="tool-tab" id="tab-checker"
+              onclick="switchTool('checker')">
         Alumni list checker
       </button>
 
-      <button class="tool-tab" id="tab-facultychecker" role="tab"
-          aria-selected="false" onclick="switchTool('facultychecker')">
+      <button class="tool-tab" id="tab-facultychecker"
+              onclick="switchTool('facultychecker')">
         Faculty list checker
       </button>
 
-      <button class="tool-tab" id="tab-responserates" role="tab"
-              aria-selected="false" onclick="switchTool('responserates')">
+      <button class="tool-tab" id="tab-responserates"
+              onclick="switchTool('responserates')">
         Response rates
       </button>
+
     </div>
 
     <div id="panel-home" class="tool-panel active" role="tabpanel">
