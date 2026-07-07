@@ -27,6 +27,11 @@
         Alumni list checker
       </button>
 
+      <button class="tool-tab" id="tab-facultychecker" role="tab"
+          aria-selected="false" onclick="switchTool('facultychecker')">
+        Faculty list checker
+      </button>
+
       <button class="tool-tab" id="tab-responserates" role="tab"
               aria-selected="false" onclick="switchTool('responserates')">
         Response rates
@@ -41,10 +46,10 @@
 
         <div class="upload-zone" id="checker-drop-zone">
           <svg width="32" height="32" fill="none" stroke="currentColor"
-               stroke-width="1.5" viewBox="0 0 24 24">
+              stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round"
                   d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0
-                     0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
           </svg>
 
           <div class="uz-title">Drop your alumni file here, or click to browse</div>
@@ -83,7 +88,7 @@
 
         <div class="banner banner-danger hidden" id="err-banner">
           <svg width="16" height="16" fill="none" stroke="currentColor"
-               stroke-width="2" viewBox="0 0 24 24">
+              stroke-width="2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -107,6 +112,84 @@
     </div>
 
     </div>
+
+    <!-- Faculty list checker -->
+    <div id="panel-facultychecker" class="tool-panel" role="tabpanel">
+
+      <div class="card" id="facultychecker-upload-card">
+        <p class="section-label">Step 1 — Upload faculty list</p>
+
+        <div class="upload-zone" id="facultychecker-drop-zone">
+          <svg width="32" height="32" fill="none" stroke="currentColor"
+              stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0
+                    0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+
+          <div class="uz-title">Drop your faculty list here, or click to browse</div>
+          <div class="uz-hint">Supports .xlsx, .xls and .csv</div>
+        </div>
+
+        <input type="file" id="facultychecker-file-input" accept=".xlsx,.xls,.csv" />
+      </div>
+
+  <div class="card hidden" id="facultychecker-school-upload-card">
+    <p class="section-label">Step 2 — Upload school survey data</p>
+
+    <div id="facultychecker-file-badge-area"></div>
+
+    <p class="helper-text">
+      Upload the school file containing sid, school_name and faculty count.
+    </p>
+
+    <div class="upload-zone" id="facultychecker-school-drop-zone">
+      <svg width="32" height="32" fill="none" stroke="currentColor"
+          stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0
+                0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+      </svg>
+
+      <div class="uz-title">Drop your school survey file here, or click to browse</div>
+      <div class="uz-hint">Supports .xlsx, .xls and .csv</div>
+    </div>
+
+    <input type="file" id="facultychecker-school-file-input" accept=".xlsx,.xls,.csv" />
+  </div>
+
+  <div class="card hidden" id="facultychecker-config-card">
+    <p class="section-label">Step 3 — Map columns</p>
+
+    <div id="facultychecker-school-file-badge-area"></div>
+
+    <div class="col-map-grid">
+      <div class="field-group"><label>Faculty school ID column</label><select id="facultychecker-col-sid"></select></div>
+      <div class="field-group"><label>Faculty school name column</label><select id="facultychecker-col-school"></select></div>
+      <div class="field-group"><label>First name column</label><select id="facultychecker-col-first"></select></div>
+      <div class="field-group"><label>Surname / family name column</label><select id="facultychecker-col-surname"></select></div>
+      <div class="field-group"><label>Middle initials column</label><select id="facultychecker-col-middle"></select></div>
+      <div class="field-group"><label>ORCID column</label><select id="facultychecker-col-orcid"></select></div>
+      <div class="field-group"><label>School data ID column</label><select id="facultychecker-school-col-sid"></select></div>
+      <div class="field-group"><label>School data name column</label><select id="facultychecker-school-col-name"></select></div>
+      <div class="field-group"><label>Reported faculty count column</label><select id="facultychecker-school-col-faculty"></select></div>
+    </div>
+
+    <div class="banner banner-danger hidden" id="facultychecker-err-banner">
+      <span id="facultychecker-err-text"></span>
+    </div>
+
+    <button class="btn-primary" id="facultychecker-run-btn" onclick="runFacultyChecks()">
+      Run faculty checks
+    </button>
+  </div>
+
+  <div class="hidden" id="facultychecker-results-section">
+    <div class="stats-row" id="facultychecker-stats-row"></div>
+    <div id="facultychecker-results-area"></div>
+  </div>
+
+</div> 
 
     <!-- Response rates -->
     <div id="panel-responserates" class="tool-panel" role="tabpanel">
@@ -140,6 +223,7 @@
 
   <script src="js/app.js"></script>
   <script src="js/tools/checker.js"></script>
+  <script src="js/tools/facultychecker.js"></script>
   <script src="js/tools/responserates.js"></script>
 </body>
 </html>

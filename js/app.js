@@ -2,6 +2,14 @@
    app.js — shared utilities
    ================================================================ */
 
+window.addEventListener('dragover', event => {
+  event.preventDefault();
+});
+
+window.addEventListener('drop', event => {
+  event.preventDefault();
+});
+
 function switchTool(name) {
   document.querySelectorAll('.tool-tab').forEach(btn => {
     btn.classList.remove('active');
@@ -47,52 +55,65 @@ function setupSpreadsheetUpload(config) {
   const dropZone = document.getElementById(config.dropZoneId);
   const fileInput = document.getElementById(config.fileInputId);
 
-  if (!dropZone || !fileInput) return;
+  if (!dropZone || !fileInput) {
+    console.warn('Upload setup failed:', config.dropZoneId, config.fileInputId);
+    return;
+  }
 
-  dropZone.addEventListener('click', () => fileInput.click());
+  function loadFile(file) {
+    if (!file) return;
 
-  dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-  });
-
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-
-    if (e.dataTransfer.files[0]) {
-      if (config.onStart) {
-        config.onStart();
-      }
-
-      setTimeout(() => {
-        readSpreadsheetFile(
-          e.dataTransfer.files[0],
-          config.onLoaded,
-          config.onError
-        );
-      }, 50);
+    if (config.onStart) {
+      config.onStart();
     }
+
+    setTimeout(() => {
+      readSpreadsheetFile(
+        file,
+        config.onLoaded,
+        config.onError
+      );
+    }, 50);
+  }
+
+  dropZone.addEventListener('click', () => {
+    fileInput.click();
   });
 
-  fileInput.addEventListener('change', e => {
-    if (e.target.files[0]) {
-      if (config.onStart) {
-        config.onStart();
-      }
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, event => {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.add('drag-over');
+    });
+  });
 
-      setTimeout(() => {
-        readSpreadsheetFile(
-          e.target.files[0],
-          config.onLoaded,
-          config.onError
-        );
-      }, 50);
-    }
+  ['dragleave', 'dragend'].forEach(eventName => {
+    dropZone.addEventListener(eventName, event => {
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.remove('drag-over');
+    });
+  });
+
+  dropZone.addEventListener('drop', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    dropZone.classList.remove('drag-over');
+
+    const file = event.dataTransfer && event.dataTransfer.files
+      ? event.dataTransfer.files[0]
+      : null;
+
+    loadFile(file);
+  });
+
+  fileInput.addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0]
+      ? event.target.files[0]
+      : null;
+
+    loadFile(file);
   });
 }
 
