@@ -21,6 +21,11 @@
       <div class="wordmark">BizEd Tools</div>
     </header>
 
+    <button class="tool-tab active" id="tab-home" role="tab"
+            aria-selected="true" onclick="switchTool('home')">
+      Home
+    </button>
+
     <div class="tool-tabs" role="tablist">
       <button class="tool-tab active" id="tab-checker" role="tab"
               aria-selected="true" onclick="switchTool('checker')">
@@ -36,6 +41,27 @@
               aria-selected="false" onclick="switchTool('responserates')">
         Response rates
       </button>
+    </div>
+
+    <div id="panel-home" class="tool-panel active" role="tabpanel">
+      <div class="card home-card">
+        <h1>BizEd Tools</h1>
+        <p class="helper-text">Choose a task below.</p>
+
+        <div class="home-task-grid">
+          <button class="home-task" onclick="switchTool('checker')">
+            Alumni list checker
+          </button>
+
+          <button class="home-task" onclick="switchTool('facultychecker')">
+            Faculty list checker
+          </button>
+
+          <button class="home-task" onclick="switchTool('responserates')">
+            Response rates
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Alumni list checker -->

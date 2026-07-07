@@ -803,3 +803,33 @@ input[type="file"] {
   color: var(--ink-mid);
   cursor: pointer;
 }
+
+.home-card {
+  text-align: center;
+}
+
+.home-card h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  color: var(--brand-text);
+  margin-bottom: 8px;
+}
+
+.home-task-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.home-task {
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  background: var(--surface-alt);
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.home-task:hover {
+  background: var(--brand);
+}

@@ -36,6 +36,7 @@ function switchTool(name) {
   localStorage.setItem('selectedToolTab', name);
   history.replaceState(null, '', '#' + name);
   const titles = {
+    home: 'Home',
     checker: 'Alumni list checker',
     facultychecker: 'Faculty list checker',
     responserates: 'Response rates'
