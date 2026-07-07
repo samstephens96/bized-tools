@@ -34,6 +34,7 @@ function switchTool(name) {
 
   // Remember the selected tab
   localStorage.setItem('selectedToolTab', name);
+  history.replaceState(null, '', '#' + name);
 }
 
 function showBanner(elementId, message, type = 'danger') {
