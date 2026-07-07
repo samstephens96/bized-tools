@@ -785,17 +785,22 @@ setupSpreadsheetUpload({
   }
 });
 
-setupSpreadsheetUpload({
-  dropZoneId: 'facultychecker-results-area',
-  fileInputId: 'faculty-rr-file-input',
+const facultyRrFileInput = document.getElementById('faculty-rr-file-input');
 
-  onLoaded: ({ rows, headers }) => {
-    facultyRrRows = rows;
-    facultyRrHeaders = headers;
-    applyFacultyRrDrops(rows, headers);
-  },
+if (facultyRrFileInput) {
+  facultyRrFileInput.addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
 
-  onError: err => {
-    showBanner('facultychecker-err-banner', err.message);
-  }
-});
+    if (!file) return;
+
+    readSpreadsheetFile(
+      file,
+      ({ rows, headers }) => {
+        facultyRrRows = rows;
+        facultyRrHeaders = headers;
+        applyFacultyRrDrops(rows, headers);
+      },
+      err => showBanner('facultychecker-err-banner', err.message)
+    );
+  });
+}
