@@ -684,3 +684,122 @@ input[type="file"] {
   justify-content: flex-end;
   gap: 10px;
 }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-card {
+  width: min(420px, calc(100% - 32px));
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.asia-review-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+.asia-review-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.asia-review-head h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.asia-review-head p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 560px;
+}
+
+.asia-review-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.asia-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.asia-review-row:last-child {
+  border-bottom: none;
+}
+
+.asia-review-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.asia-review-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.asia-review-schools {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+}
+
+.asia-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.copy-name-btn {
+  border: 0.5px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--ink-mid);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.copy-name-btn:hover {
+  background: var(--brand);
+  color: var(--brand-text);
+}
+
+.remove-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-mid);
+  cursor: pointer;
+}
