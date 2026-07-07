@@ -620,7 +620,7 @@ function toggleAsiaReview() {
 
 function updateFacultyDuplicateEmails() {
   document
-    .querySelectorAll('.asia-review-action input[type="checkbox"]:checked')
+    .querySelectorAll('.asia-review-actions input[type="checkbox"]:checked')
     .forEach(box => {
       facultyRemovedDuplicateNames.add(box.dataset.fullName);
     });

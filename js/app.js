@@ -120,33 +120,49 @@ function setupSpreadsheetUpload(config) {
 function readSpreadsheetFile(file, onLoaded, onError) {
   const reader = new FileReader();
 
-  reader.onload = e => {
-    try {
-      const workbook = XLSX.read(e.target.result, { type: 'binary' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+  reader.onload = event => {
+    setTimeout(() => {
+      try {
+        const workbook = XLSX.read(event.target.result, {
+          type: 'array',
+          cellDates: false,
+          cellNF: false,
+          cellStyles: false
+        });
 
-      if (!rows.length) {
-        throw new Error('File appears to be empty.');
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          defval: ''
+        });
+
+        if (!rows.length) {
+          throw new Error('File appears to be empty.');
+        }
+
+        onLoaded({
+          file,
+          rows,
+          headers: Object.keys(rows[0])
+        });
+
+      } catch (err) {
+        if (onError) {
+          onError(err);
+        } else {
+          alert(err.message);
+        }
       }
+    }, 0);
+  };
 
-      const headers = Object.keys(rows[0]);
-
-      onLoaded({
-        file,
-        rows,
-        headers
-      });
-    } catch (err) {
-      if (onError) {
-        onError(err);
-      } else {
-        alert(err.message);
-      }
+  reader.onerror = () => {
+    if (onError) {
+      onError(new Error('Could not read the file.'));
     }
   };
 
-  reader.readAsBinaryString(file);
+  reader.readAsArrayBuffer(file);
 }
 
 function normaliseHeader(text) {
