@@ -31,6 +31,9 @@ function switchTool(name) {
   if (panel) {
     panel.classList.add('active');
   }
+
+  // Remember the selected tab
+  localStorage.setItem('selectedToolTab', name);
 }
 
 function showBanner(elementId, message, type = 'danger') {
