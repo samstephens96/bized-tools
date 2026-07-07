@@ -804,32 +804,46 @@ input[type="file"] {
   cursor: pointer;
 }
 
-.home-card {
-  text-align: center;
-}
-
 .home-card h1 {
   font-family: var(--font-serif);
+  font-size: 28px;
   font-weight: 400;
   color: var(--brand-text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .home-task-grid {
   display: grid;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 22px;
 }
 
-.home-task {
+.home-task-card {
+  width: 100%;
+  text-align: left;
   padding: 16px;
   border-radius: var(--radius);
   border: 0.5px solid var(--border);
   background: var(--surface-alt);
-  font-family: var(--font-sans);
   cursor: pointer;
+  font-family: var(--font-sans);
 }
 
-.home-task:hover {
+.home-task-card span {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.home-task-card small {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-light);
+}
+
+.home-task-card:hover {
   background: var(--brand);
+  border-color: var(--brand-dark);
 }
