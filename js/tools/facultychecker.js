@@ -6,6 +6,10 @@ let latestFacultyEmails = [];
 let facultyAsiaDuplicates = [];
 let facultyRemovedDuplicateNames = new Set();
 let latestFacultyResults = [];
+let facultyDroppedSchoolIds = new Set();
+let facultyDroppedSchoolNames = new Set();
+let facultyRrRows = [];
+let facultyRrHeaders = [];
 
 function facultyNormaliseHeader(text) {
   return String(text || '')
@@ -121,6 +125,11 @@ function resetFacultyChecker() {
   facultyAsiaDuplicates = [];
   facultyRemovedDuplicateNames = new Set();
   latestFacultyResults = [];
+  facultyDroppedSchoolIds = new Set();
+  facultyDroppedSchoolNames = new Set();
+  facultyRrRows = [];
+  facultyRrHeaders = [];
+  document.getElementById('faculty-rr-file-input').value = '';
 
   [
     'facultychecker-upload-card',
@@ -400,6 +409,11 @@ function renderFacultyResults(results) {
       <div class="n">↺</div>
       <div class="lbl">Start over</div>
     </div>
+
+    <div class="stat-box stat-btn-box" onclick="openFacultyRrUpload()">
+      <div class="n">−</div>
+      <div class="lbl">Remove schools that haven't made RR</div>
+    </div>
   `;
   const area = document.getElementById('facultychecker-results-area');
   const asiaHtml = renderFacultyAsiaDuplicateReview();
@@ -645,6 +659,52 @@ function updateFacultyDuplicateEmails() {
   renderFacultyResults(latestFacultyResults);
 }
 
+
+function openFacultyRrUpload() {
+  document.getElementById('faculty-rr-file-input').click();
+}
+
+function schoolShouldBeDropped(value) {
+  const text = String(value || '').toLowerCase().trim();
+
+  return [
+    'yes',
+    'y',
+    'true',
+    '1',
+    'drop',
+    'dropped',
+    'remove',
+    'x'
+  ].includes(text);
+}
+
+function applyFacultyRrDrops(rows, headers) {
+  const sidCol = facultyGuess(headers, ['sid', 'school id', 'ft school id']);
+  const schoolCol = facultyGuess(headers, ['school name', 'school']);
+  const dropCol = facultyGuess(headers, ['drop', 'dropped', 'remove', 'made rr']);
+
+  facultyDroppedSchoolIds = new Set();
+  facultyDroppedSchoolNames = new Set();
+
+  rows.forEach(row => {
+    if (!schoolShouldBeDropped(row[dropCol])) return;
+
+    facultyDroppedSchoolIds.add(facultyNormaliseSid(row[sidCol]));
+    facultyDroppedSchoolNames.add(String(row[schoolCol] || '').trim());
+  });
+
+  latestFacultyResults = latestFacultyResults.filter(result => {
+    const sidMatch = facultyDroppedSchoolIds.has(facultyNormaliseSid(result.sid));
+    const nameMatch = facultyDroppedSchoolNames.has(String(result.schoolName || '').trim());
+
+    return !sidMatch && !nameMatch;
+  });
+
+  renderFacultyResults(latestFacultyResults);
+}
+
+
 const facultyAsianSurnames = [
   'Ai', 'An', 'Bai', 'Bao', 'Cai', 'Cao', 'Chang', 'Chao', 'Chen',
   'Cheng', 'Chi', 'Chiu', 'Chu', 'Cui', 'Dai', 'Deng', 'Ding',
@@ -686,13 +746,6 @@ function getFacultyAsianSurnameRows(cols) {
   });
 
 }
-console.log('facultychecker.js loaded');
-
-const facultyDropZone = document.getElementById('facultychecker-drop-zone');
-const facultyInput = document.getElementById('facultychecker-file-input');
-
-console.log('faculty drop zone:', facultyDropZone);
-console.log('faculty input:', facultyInput);
 
 setupSpreadsheetUpload({
   dropZoneId: 'facultychecker-drop-zone',
@@ -728,6 +781,21 @@ setupSpreadsheetUpload({
 
   onError: err => {
     console.error(err);
+    showBanner('facultychecker-err-banner', err.message);
+  }
+});
+
+setupSpreadsheetUpload({
+  dropZoneId: 'facultychecker-results-area',
+  fileInputId: 'faculty-rr-file-input',
+
+  onLoaded: ({ rows, headers }) => {
+    facultyRrRows = rows;
+    facultyRrHeaders = headers;
+    applyFacultyRrDrops(rows, headers);
+  },
+
+  onError: err => {
     showBanner('facultychecker-err-banner', err.message);
   }
 });
