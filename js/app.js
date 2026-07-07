@@ -35,6 +35,13 @@ function switchTool(name) {
   // Remember the selected tab
   localStorage.setItem('selectedToolTab', name);
   history.replaceState(null, '', '#' + name);
+  const titles = {
+    checker: 'Alumni list checker',
+    facultychecker: 'Faculty list checker',
+    responserates: 'Response rates'
+  };
+
+  document.title = `${titles[name]} | BizEd Tools`;
 }
 
 function showBanner(elementId, message, type = 'danger') {
@@ -182,3 +189,18 @@ function cleanEmail(value) {
     .toLowerCase()
     .trim();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+
+  if (hash && document.getElementById('tab-' + hash)) {
+    switchTool(hash);
+    return;
+  }
+
+  const savedTab = localStorage.getItem('selectedToolTab');
+
+  if (savedTab && document.getElementById('tab-' + savedTab)) {
+    switchTool(savedTab);
+  }
+});
