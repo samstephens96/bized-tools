@@ -143,6 +143,7 @@ function resetFacultyChecker() {
 
   document.getElementById('facultychecker-file-input').value = '';
   document.getElementById('facultychecker-school-file-input').value = '';
+  sessionStorage.removeItem('facultyState');
 }
 
 function facultyAddCheck(store, sid, schoolName, reason) {
@@ -424,7 +425,7 @@ function renderFacultyResults(results) {
       </div>
     `;
     return;
-
+    saveFacultyState();
   }
 
   latestFacultyEmails = results.map(result => {
@@ -804,3 +805,38 @@ if (facultyRrFileInput) {
     );
   });
 }
+
+function saveFacultyState() {
+  sessionStorage.setItem('facultyState', JSON.stringify({
+    facultyRows,
+    facultyHeaders,
+    facultySchoolRows,
+    facultySchoolHeaders,
+    latestFacultyResults,
+    latestFacultyEmails,
+    facultyAsiaDuplicates,
+    facultyRemovedDuplicateNames: [...facultyRemovedDuplicateNames]
+  }));
+}
+
+function restoreFacultyState() {
+  const saved = sessionStorage.getItem('facultyState');
+  if (!saved) return;
+
+  const state = JSON.parse(saved);
+
+  facultyRows = state.facultyRows || [];
+  facultyHeaders = state.facultyHeaders || [];
+  facultySchoolRows = state.facultySchoolRows || [];
+  facultySchoolHeaders = state.facultySchoolHeaders || [];
+  latestFacultyResults = state.latestFacultyResults || [];
+  latestFacultyEmails = state.latestFacultyEmails || [];
+  facultyAsiaDuplicates = state.facultyAsiaDuplicates || [];
+  facultyRemovedDuplicateNames = new Set(state.facultyRemovedDuplicateNames || []);
+
+  if (latestFacultyResults.length) {
+    renderFacultyResults(latestFacultyResults);
+  }
+}
+
+restoreFacultyState();
