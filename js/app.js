@@ -205,14 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (hash && document.getElementById('tab-' + hash)) {
     switchTool(hash);
-    return;
-  }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const hash = window.location.hash.replace('#', '');
-
-  if (hash && document.getElementById('tab-' + hash)) {
-    switchTool(hash);
   } else {
     switchTool('home');
   }
