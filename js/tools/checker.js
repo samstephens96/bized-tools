@@ -5,13 +5,25 @@ setupSpreadsheetUpload({
   dropZoneId: 'checker-drop-zone',
   fileInputId: 'checker-file-input',
 
+  onStart: () => {
+    document.getElementById('status-bar').classList.remove('hidden');
+    document.getElementById('run-btn').disabled = true;
+  },
+
   onLoaded: ({ file, rows, headers }) => {
     parsedRows = rows;
     fileHeaders = headers;
+
+    document.getElementById('status-bar').classList.add('hidden');
+    document.getElementById('run-btn').disabled = false;
+
     populateColumnMapping(file.name);
   },
 
   onError: err => {
+    document.getElementById('status-bar').classList.add('hidden');
+    document.getElementById('run-btn').disabled = false;
+
     showBanner('err-banner', err.message);
   }
 });
