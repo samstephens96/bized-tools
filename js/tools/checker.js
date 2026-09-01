@@ -92,24 +92,27 @@ function runChecks() {
   const colEmail = document.getElementById('col-email').value;
   const colAlt = document.getElementById('col-alt').value;
 
-  const rows = parsedRows.map((row, index) => {
-    const sid = normaliseSid(row[colSid]);
+const schoolCounters = {};
 
-    // SheetJS stores the original zero-based worksheet row in __rowNum__.
-    // Add 1 so the checker reports the row number shown in Excel.
-    // Fall back to index + 2 (one header row + one-based numbering) if needed.
-    const excelRow = Number.isInteger(row.__rowNum__)
-      ? row.__rowNum__ + 1
-      : index + 2;
+const rows = parsedRows.map(row => {
+  const sid = normaliseSid(row[colSid]);
 
-    return {
-      school: String(row[colSchool] || '').trim(),
-      sid,
-      email: cleanEmail(row[colEmail]),
-      alt: cleanEmail(row[colAlt]),
-      excelRow
-    };
-  });
+  if (!schoolCounters[sid]) {
+    schoolCounters[sid] = 0;
+  }
+
+  schoolCounters[sid] += 1;
+
+  return {
+    school: String(row[colSchool] || '').trim(),
+    sid,
+    email: cleanEmail(row[colEmail]),
+    alt: cleanEmail(row[colAlt]),
+
+    // +1 because row 1 in each school's original Excel file is the header
+    excelRow: schoolCounters[sid] + 1
+  };
+});
 
   const issues = [];
   const seenIssueKeys = new Set();
