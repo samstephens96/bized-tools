@@ -208,9 +208,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const savedTab = localStorage.getItem('selectedToolTab');
+document.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
 
-  if (savedTab && document.getElementById('tab-' + savedTab)) {
-    switchTool(savedTab);
+  if (hash && document.getElementById('tab-' + hash)) {
+    switchTool(hash);
+  } else {
+    switchTool('home');
   }
 });
