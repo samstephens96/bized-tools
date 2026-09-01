@@ -31,22 +31,43 @@ function switchTool(name) {
   if (panel) {
     panel.classList.add('active');
   }
-  const header = document.querySelector('.site-header');
-const tabs = document.getElementById('tool-tabs');
 
-if (name === 'home') {
-    header.style.display = 'none';
-    tabs.style.display = 'none';
-} else {
-    header.style.display = '';
-    tabs.style.display = 'flex';
-}
-  // Remember the selected tab
+  const header = document.querySelector('.site-header');
+  const tabs = document.getElementById('tool-tabs');
+
   if (name === 'home') {
-  history.replaceState(null, '', window.location.pathname);
-} else {
-  history.replaceState(null, '', '#' + name);
-}
+    if (header) {
+      header.style.display = 'none';
+    }
+
+    if (tabs) {
+      tabs.style.display = 'none';
+    }
+  } else {
+    if (header) {
+      header.style.display = '';
+    }
+
+    if (tabs) {
+      tabs.style.display = 'flex';
+    }
+  }
+
+  // Keep the base URL clean when Home is selected.
+  if (name === 'home') {
+    history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search
+    );
+  } else {
+    history.replaceState(
+      null,
+      '',
+      '#' + name
+    );
+  }
+
   const titles = {
     home: 'Home',
     checker: 'Alumni list checker',
@@ -54,7 +75,7 @@ if (name === 'home') {
     responserates: 'Response rates'
   };
 
-  document.title = `${titles[name]} | BizEd Tools`;
+  document.title = `${titles[name] || 'Home'} | BizEd Tools`;
 }
 
 function showBanner(elementId, message, type = 'danger') {
@@ -80,7 +101,12 @@ function setupSpreadsheetUpload(config) {
   const fileInput = document.getElementById(config.fileInputId);
 
   if (!dropZone || !fileInput) {
-    console.warn('Upload setup failed:', config.dropZoneId, config.fileInputId);
+    console.warn(
+      'Upload setup failed:',
+      config.dropZoneId,
+      config.fileInputId
+    );
+
     return;
   }
 
@@ -108,6 +134,7 @@ function setupSpreadsheetUpload(config) {
     dropZone.addEventListener(eventName, event => {
       event.preventDefault();
       event.stopPropagation();
+
       dropZone.classList.add('drag-over');
     });
   });
@@ -116,6 +143,7 @@ function setupSpreadsheetUpload(config) {
     dropZone.addEventListener(eventName, event => {
       event.preventDefault();
       event.stopPropagation();
+
       dropZone.classList.remove('drag-over');
     });
   });
@@ -123,19 +151,24 @@ function setupSpreadsheetUpload(config) {
   dropZone.addEventListener('drop', event => {
     event.preventDefault();
     event.stopPropagation();
+
     dropZone.classList.remove('drag-over');
 
-    const file = event.dataTransfer && event.dataTransfer.files
-      ? event.dataTransfer.files[0]
-      : null;
+    const file =
+      event.dataTransfer &&
+      event.dataTransfer.files
+        ? event.dataTransfer.files[0]
+        : null;
 
     loadFile(file);
   });
 
   fileInput.addEventListener('change', event => {
-    const file = event.target.files && event.target.files[0]
-      ? event.target.files[0]
-      : null;
+    const file =
+      event.target.files &&
+      event.target.files[0]
+        ? event.target.files[0]
+        : null;
 
     loadFile(file);
   });
@@ -147,21 +180,33 @@ function readSpreadsheetFile(file, onLoaded, onError) {
   reader.onload = event => {
     setTimeout(() => {
       try {
-        const workbook = XLSX.read(event.target.result, {
-          type: 'array',
-          cellDates: false,
-          cellNF: false,
-          cellStyles: false
-        });
+        const workbook = XLSX.read(
+          event.target.result,
+          {
+            type: 'array',
+            cellDates: false,
+            cellNF: false,
+            cellStyles: false
+          }
+        );
 
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const worksheet =
+          workbook.Sheets[
+            workbook.SheetNames[0]
+          ];
 
-        const rows = XLSX.utils.sheet_to_json(worksheet, {
-          defval: ''
-        });
+        const rows =
+          XLSX.utils.sheet_to_json(
+            worksheet,
+            {
+              defval: ''
+            }
+          );
 
         if (!rows.length) {
-          throw new Error('File appears to be empty.');
+          throw new Error(
+            'File appears to be empty.'
+          );
         }
 
         onLoaded({
@@ -182,7 +227,11 @@ function readSpreadsheetFile(file, onLoaded, onError) {
 
   reader.onerror = () => {
     if (onError) {
-      onError(new Error('Could not read the file.'));
+      onError(
+        new Error(
+          'Could not read the file.'
+        )
+      );
     }
   };
 
@@ -203,12 +252,33 @@ function cleanEmail(value) {
     .trim();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const hash = window.location.hash.replace('#', '');
+function initialiseTool() {
+  // Remove the old saved-tab value used by previous versions.
+  localStorage.removeItem('selectedToolTab');
 
-  if (hash && document.getElementById('tab-' + hash)) {
+  const hash =
+    window.location.hash.replace('#', '');
+
+  if (
+    hash &&
+    document.getElementById(
+      'tab-' + hash
+    )
+  ) {
     switchTool(hash);
   } else {
     switchTool('home');
   }
-});
+}
+
+document.addEventListener(
+  'DOMContentLoaded',
+  initialiseTool
+);
+
+// Handles Safari/Chrome restoring a previously viewed page
+// from the browser's back-forward cache.
+window.addEventListener(
+  'pageshow',
+  initialiseTool
+);
