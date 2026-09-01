@@ -42,8 +42,11 @@ if (name === 'home') {
     tabs.style.display = 'flex';
 }
   // Remember the selected tab
-  localStorage.setItem('selectedToolTab', name);
+  if (name === 'home') {
+  history.replaceState(null, '', window.location.pathname);
+} else {
   history.replaceState(null, '', '#' + name);
+}
   const titles = {
     home: 'Home',
     checker: 'Alumni list checker',
