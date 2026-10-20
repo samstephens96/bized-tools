@@ -72,7 +72,8 @@ function switchTool(name) {
     home: 'Home',
     checker: 'Alumni list checker',
     facultychecker: 'Faculty list checker',
-    responserates: 'Response rates'
+    responserates: 'Response rates',
+    datacheckemails: 'Data check emails'
   };
 
   document.title = `${titles[name] || 'Home'} | BizEd Tools`;

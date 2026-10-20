@@ -43,6 +43,11 @@
         Response rates
       </button>
 
+      <button class="tool-tab" id="tab-datacheckemails"
+            onclick="switchTool('datacheckemails')">
+        Data check emails
+      </button>
+
     </div>
 
     <div id="panel-home" class="tool-panel active" role="tabpanel">
@@ -64,6 +69,11 @@
           <button class="home-task-card" onclick="switchTool('responserates')">
             <span>Response rates</span>
             <small>Calculate response totals by school</small>
+          </button>
+
+          <button class="home-task-card" onclick="switchTool('datacheckemails')">
+            <span>Data check emails</span>
+            <small>Enter ranking links and deadlines by ranking and year</small>
           </button>
         </div>
       </div>
@@ -259,10 +269,49 @@
     </div>
 
     </div>
-</div> 
+</div>
+
+<!-- Data check emails -->
+<div id="panel-datacheckemails" class="tool-panel" role="tabpanel">
+  <div class="card">
+    <p class="section-label">Ranking details</p>
+
+    <div class="col-map-grid ranking-links-grid">
+
+      <div class="field-group">
+        <label for="datacheckemails-ranking">Ranking</label>
+        <select id="datacheckemails-ranking"></select>
+      </div>
+
+      <div class="field-group">
+        <label for="datacheckemails-year">Year</label>
+        <select id="datacheckemails-year"></select>
+      </div>
+
+      <div class="field-group ranking-links-wide">
+        <label for="datacheckemails-link">Link</label>
+        <input
+          type="text"
+          id="datacheckemails-link"
+          placeholder="Enter link">
+      </div>
+
+      <div class="field-group ranking-links-wide">
+        <label for="datacheckemails-deadline">Deadline</label>
+        <input
+          type="text"
+          id="datacheckemails-deadline"
+          placeholder="Enter deadline">
+      </div>
+
+    </div>
+  </div>
+</div>
+
   <script src="js/app.js"></script>
   <script src="js/tools/checker.js"></script>
   <script src="js/tools/facultychecker.js"></script>
   <script src="js/tools/responserates.js"></script>
+  <script src="js/tools/datacheckemails.js"></script>
 </body>
 </html>

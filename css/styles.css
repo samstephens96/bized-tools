@@ -847,3 +847,22 @@ input[type="file"] {
   background: var(--brand);
   border-color: var(--brand-dark);
 }
+
+/* Data check emails */
+.ranking-links-grid {
+  margin-bottom: 0;
+}
+
+.ranking-links-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 560px) {
+  .ranking-links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-links-wide {
+    grid-column: auto;
+  }
+}
