@@ -576,26 +576,30 @@ function renderFacultyAsiaDuplicateReview() {
 
           ${facultyAsiaDuplicates.map(item => `
 
-          <div class="asia-review-row">
+          <div class="asia-review-group">
+            ${item.schools.map(school => `
+              <div class="asia-review-row">
+                <div class="asia-review-main">
+                  <div class="asia-review-name">
+                    ${facultyEscapeHtml(item.fullName)}
+                  </div>
+                  <div class="asia-review-schools">
+                    ${facultyEscapeHtml(school)}
+                  </div>
+                </div>
 
-            <div class="asia-review-main">
-              <div class="asia-review-name">
-                ${facultyEscapeHtml(item.fullName)}
+                <div class="asia-review-actions">
+                  <button
+                    type="button"
+                    class="copy-name-btn"
+                    onclick="event.preventDefault();event.stopPropagation();copyFacultyName('${facultyEscapeHtml(item.fullName)}',this);">
+                    Copy name
+                  </button>
+                </div>
               </div>
+            `).join('')}
 
-              <div class="asia-review-schools">
-                ${facultyEscapeHtml(item.schools.join(', '))}
-              </div>
-            </div>
-
-            <div class="asia-review-actions">
-              <button
-                type="button"
-                class="copy-name-btn"
-                onclick="event.preventDefault();event.stopPropagation();copyFacultyName('${facultyEscapeHtml(item.fullName)}',this);">
-                Copy name
-              </button>
-
+            <div style="padding:0 0 12px;text-align:right">
               <label class="remove-check">
                 <input
                   type="checkbox"
@@ -603,7 +607,6 @@ function renderFacultyAsiaDuplicateReview() {
                 Remove
               </label>
             </div>
-
           </div>
 
           `).join('')}
