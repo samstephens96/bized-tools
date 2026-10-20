@@ -518,16 +518,21 @@ async function copyFacultyText(text, button) {
 
       textarea.value = text;
       textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
 
       document.body.appendChild(textarea);
 
       textarea.focus();
       textarea.select();
 
-      document.execCommand('copy');
+      const success = document.execCommand('copy');
 
       textarea.remove();
+
+      if (!success) {
+        throw new Error('Copy command failed');
+      }
     }
 
     const original = button.textContent;
@@ -540,7 +545,8 @@ async function copyFacultyText(text, button) {
       button.disabled = false;
     }, 1500);
 
-  } catch (e) {
+  } catch (error) {
+    console.error('Clipboard copy failed:', error);
     alert('Could not copy to clipboard.');
   }
 }
@@ -557,9 +563,17 @@ function copyFacultyBody(event, idx) {
   copyFacultyText(body, event.currentTarget);
 }
 
-function copyFacultyNameAndSchool(name, school, button) {
-  copyFacultyText(`${name} - ${school}`, button);
-}
+
+document.addEventListener('click', function (event) {
+  const button = event.target.closest('.copy-name-btn');
+
+  if (!button) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  copyFacultyText(button.dataset.copyText, button);
+});
 
 function renderFacultyAsiaDuplicateReview() {
 
