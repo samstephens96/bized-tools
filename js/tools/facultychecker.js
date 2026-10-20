@@ -511,9 +511,27 @@ function toggleFacultyCard(idx) {
 
 async function copyFacultyText(text, button) {
   try {
-    await navigator.clipboard.writeText(text);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement('textarea');
+
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+
+      document.body.appendChild(textarea);
+
+      textarea.focus();
+      textarea.select();
+
+      document.execCommand('copy');
+
+      textarea.remove();
+    }
 
     const original = button.textContent;
+
     button.textContent = 'Copied!';
     button.disabled = true;
 
@@ -521,6 +539,7 @@ async function copyFacultyText(text, button) {
       button.textContent = original;
       button.disabled = false;
     }, 1500);
+
   } catch (e) {
     alert('Could not copy to clipboard.');
   }
