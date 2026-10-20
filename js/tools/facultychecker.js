@@ -297,26 +297,33 @@ Object.keys(grouped).forEach(fullName => {
 
   if (rows.length <= 1) return;
 
-  const middleValues = rows.map(r => r.middle).filter(Boolean);
-  const orcidValues = rows.map(r => r.orcid).filter(Boolean);
+  // A populated, different ORCID is definitive evidence that two
+  // same-name faculty records are different people. Keep only rows that
+  // still have at least one possible duplicate after applying that rule.
+  const duplicateRows = rows.filter((row, i) =>
+    rows.some((other, j) => {
+      if (i === j) return false;
+      if (row.orcid && other.orcid && row.orcid !== other.orcid) return false;
+      return true;
+    })
+  );
 
-  const allHaveMiddle = middleValues.length === rows.length;
-  const allHaveOrcid = orcidValues.length === rows.length;
+  if (duplicateRows.length <= 1) return;
 
+  const middleValues = duplicateRows.map(r => r.middle).filter(Boolean);
+  const allHaveMiddle = middleValues.length === duplicateRows.length;
   const uniqueMiddle = [...new Set(middleValues)];
-  const uniqueOrcid = [...new Set(orcidValues)];
 
-  if (allHaveMiddle && uniqueMiddle.length === rows.length) return;
-  if (allHaveOrcid && uniqueOrcid.length === rows.length) return;
+  if (allHaveMiddle && uniqueMiddle.length === duplicateRows.length) return;
 
-  const hasAsianSurname = rows.some(r => {
+  const hasAsianSurname = duplicateRows.some(r => {
     const parts = r.fullName.split(' ');
     const surname = parts[parts.length - 1];
     return facultyAsianSurnames.includes(surname);
   });
 
   const schoolNames = [...new Set(
-    rows.map(r => {
+    duplicateRows.map(r => {
       const school = schoolMap[r.sid];
       return school ? school.name : r.school;
     }).filter(Boolean)
@@ -329,15 +336,15 @@ Object.keys(grouped).forEach(fullName => {
       facultyAsiaDuplicates.push({
           fullName,
           schools: schoolNames,
-          rows
+          rows: duplicateRows
       });
   }
 
   if (facultyRemovedDuplicateNames.has(fullName)) return;
 
-    const uniqueSids = [...new Set(rows.map(r => r.sid))];
+    const uniqueSids = [...new Set(duplicateRows.map(r => r.sid))];
 
-    rows.forEach(row => {
+    duplicateRows.forEach(row => {
       const school = schoolMap[row.sid];
       const currentSchoolName = school ? school.name : row.school;
 
