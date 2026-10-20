@@ -622,7 +622,7 @@ function renderFacultyAsiaDuplicateReview() {
                     <button
                       type="button"
                       class="copy-name-btn"
-                      onclick="event.preventDefault();event.stopPropagation();copyFacultyNameAndSchool(${JSON.stringify(item.fullName)},${JSON.stringify(school)},this);">
+                      data-copy-text="${facultyEscapeHtml(`${item.fullName} - ${school}`)}">
                       Copy name &amp; school
                     </button>
                   </div>
