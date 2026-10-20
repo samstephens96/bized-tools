@@ -576,11 +576,11 @@ function renderFacultyAsiaDuplicateReview() {
 
           ${facultyAsiaDuplicates.map(item => `
 
-          <div class="asia-review-group">
-            <div class="asia-review-group-head">
+          <div class="asia-review-group" style="padding:14px;margin-bottom:14px;border:1px solid #dfc9b8;border-radius:12px;background:#fffaf6;">
+            <div class="asia-review-group-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;">
               <div>
-                <div class="asia-review-group-name">${facultyEscapeHtml(item.fullName)}</div>
-                <div class="asia-review-count">${item.schools.length} potential ${item.schools.length === 1 ? 'duplicate' : 'duplicates'}</div>
+                <div class="asia-review-group-name" style="font-size:15px;font-weight:600;">${facultyEscapeHtml(item.fullName)}</div>
+                <div class="asia-review-count" style="margin-top:2px;font-size:12px;color:#6f625b;">${item.schools.length} potential ${item.schools.length === 1 ? 'duplicate' : 'duplicates'}</div>
               </div>
 
               <label class="remove-check duplicate-remove-check">
@@ -591,15 +591,15 @@ function renderFacultyAsiaDuplicateReview() {
               </label>
             </div>
 
-            <div class="asia-review-bubbles">
+            <div class="asia-review-bubbles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
               ${item.schools.map((school, index) => `
-                <div class="asia-review-bubble">
-                  <div class="asia-review-number">${index + 1}</div>
-                  <div class="asia-review-main">
-                    <div class="asia-review-name">${facultyEscapeHtml(item.fullName)}</div>
-                    <div class="asia-review-schools">${facultyEscapeHtml(school)}</div>
+                <div class="asia-review-bubble" style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:12px;border:1px solid #dfc9b8;border-radius:10px;background:#ffffff;">
+                  <div class="asia-review-number" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#f4dfcf;font-size:12px;font-weight:600;">${index + 1}</div>
+                  <div class="asia-review-main" style="min-width:0;">
+                    <div class="asia-review-name" style="font-weight:600;margin-bottom:3px;">${facultyEscapeHtml(item.fullName)}</div>
+                    <div class="asia-review-schools" style="font-size:13px;color:#6f625b;line-height:1.35;">${facultyEscapeHtml(school)}</div>
                   </div>
-                  <div class="asia-review-actions">
+                  <div class="asia-review-actions" style="grid-column:2;margin-top:8px;">
                     <button
                       type="button"
                       class="copy-name-btn"
