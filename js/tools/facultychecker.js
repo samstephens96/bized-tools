@@ -538,8 +538,8 @@ function copyFacultyBody(event, idx) {
   copyFacultyText(body, event.currentTarget);
 }
 
-function copyFacultyName(name, button) {
-  copyFacultyText(name, button);
+function copyFacultyNameAndSchool(name, school, button) {
+  copyFacultyText(`${name} - ${school}`, button);
 }
 
 function renderFacultyAsiaDuplicateReview() {
@@ -577,35 +577,38 @@ function renderFacultyAsiaDuplicateReview() {
           ${facultyAsiaDuplicates.map(item => `
 
           <div class="asia-review-group">
-            ${item.schools.map(school => `
-              <div class="asia-review-row">
-                <div class="asia-review-main">
-                  <div class="asia-review-name">
-                    ${facultyEscapeHtml(item.fullName)}
-                  </div>
-                  <div class="asia-review-schools">
-                    ${facultyEscapeHtml(school)}
-                  </div>
-                </div>
-
-                <div class="asia-review-actions">
-                  <button
-                    type="button"
-                    class="copy-name-btn"
-                    onclick="event.preventDefault();event.stopPropagation();copyFacultyName('${facultyEscapeHtml(item.fullName)}',this);">
-                    Copy name
-                  </button>
-                </div>
+            <div class="asia-review-group-head">
+              <div>
+                <div class="asia-review-group-name">${facultyEscapeHtml(item.fullName)}</div>
+                <div class="asia-review-count">${item.schools.length} potential ${item.schools.length === 1 ? 'duplicate' : 'duplicates'}</div>
               </div>
-            `).join('')}
 
-            <div style="padding:0 0 12px;text-align:right">
-              <label class="remove-check">
+              <label class="remove-check duplicate-remove-check">
                 <input
                   type="checkbox"
                   data-full-name="${facultyEscapeHtml(item.fullName)}">
                 Remove
               </label>
+            </div>
+
+            <div class="asia-review-bubbles">
+              ${item.schools.map((school, index) => `
+                <div class="asia-review-bubble">
+                  <div class="asia-review-number">${index + 1}</div>
+                  <div class="asia-review-main">
+                    <div class="asia-review-name">${facultyEscapeHtml(item.fullName)}</div>
+                    <div class="asia-review-schools">${facultyEscapeHtml(school)}</div>
+                  </div>
+                  <div class="asia-review-actions">
+                    <button
+                      type="button"
+                      class="copy-name-btn"
+                      onclick="event.preventDefault();event.stopPropagation();copyFacultyNameAndSchool(${JSON.stringify(item.fullName)},${JSON.stringify(school)},this);">
+                      Copy name &amp; school
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
 
