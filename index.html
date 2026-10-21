@@ -274,47 +274,60 @@
 <!-- Data check emails -->
 <div id="panel-datacheckemails" class="tool-panel" role="tabpanel">
 
+  <!-- Upload -->
   <div class="card">
-    <p class="section-label">Data check emails</p>
+    <p class="section-label">Upload data</p>
 
-    <div class="col-map-grid ranking-links-grid">
-
-      <!-- File upload -->
-      <div class="field-group ranking-links-wide">
-        <label for="datacheckemails-file">Upload data</label>
-
+    <div class="upload-row">
+      <label class="file-btn">
+        Choose file
         <input
           type="file"
           id="datacheckemails-file"
           accept=".xlsx,.xls,.csv"
           onchange="handleDataCheckEmailUpload(this)"
+          hidden
         >
+      </label>
 
-        <div
-          id="datacheckemails-file-name"
-          class="file-name">
-          No file selected
-        </div>
-      </div>
+      <span id="datacheckemails-file-name" class="file-name">
+        No file selected
+      </span>
+    </div>
+  </div>
 
-      <!-- Ranking -->
+
+  <!-- Email details -->
+  <div class="card">
+    <p class="section-label">Email details</p>
+
+    <div class="col-map-grid">
+
       <div class="field-group">
         <label for="datacheckemails-ranking">Ranking</label>
-
-        <select id="datacheckemails-ranking"></select>
+        <select id="datacheckemails-ranking">
+          <option value="">Select ranking</option>
+          <option value="Global MBA">Global MBA</option>
+          <option value="Executive MBA">Executive MBA</option>
+          <option value="Masters in Management">Masters in Management</option>
+          <option value="Masters in Finance">Masters in Finance</option>
+          <option value="Online MBA">Online MBA</option>
+          <option value="Executive Education">Executive Education</option>
+        </select>
       </div>
 
-      <!-- Year -->
       <div class="field-group">
         <label for="datacheckemails-year">Year</label>
-
-        <select id="datacheckemails-year"></select>
+        <select id="datacheckemails-year">
+          <option value="">Select year</option>
+          <option value="2027">2027</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+        </select>
       </div>
 
-      <!-- Link -->
-      <div class="field-group ranking-links-wide">
-        <label for="datacheckemails-link">Link</label>
-
+      <div class="field-group">
+        <label for="datacheckemails-link">Timeline link</label>
         <input
           type="text"
           id="datacheckemails-link"
@@ -322,34 +335,31 @@
         >
       </div>
 
-      <!-- Deadline -->
-      <div class="field-group ranking-links-wide">
+      <div class="field-group">
         <label for="datacheckemails-deadline">Deadline</label>
-
         <input
           type="text"
           id="datacheckemails-deadline"
-          placeholder="Enter deadline"
+          placeholder="e.g. Friday 30 October"
         >
       </div>
 
-      <!-- Generate -->
-      <div class="ranking-links-wide">
-        <button
-          type="button"
-          class="primary-btn"
-          onclick="generateDataCheckEmails()">
-          Generate emails
-        </button>
-      </div>
-
-      <!-- Results -->
-      <div
-        id="datacheckemails-results"
-        class="ranking-links-wide">
-      </div>
-
     </div>
+  </div>
+
+
+  <!-- Generate -->
+  <div class="card">
+    <div class="action-row">
+      <button
+        type="button"
+        class="btn-primary"
+        onclick="generateDataCheckEmails()">
+        Generate emails
+      </button>
+    </div>
+
+    <div id="datacheckemails-results"></div>
   </div>
 
 </div>

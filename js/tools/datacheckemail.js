@@ -1,34 +1,6 @@
 let dataCheckEmailData = null;
 let dataCheckEmailResults = null;
 
-function initDataCheckEmails() {
-  const rankingSelect = document.getElementById('datacheckemails-ranking');
-  const yearSelect = document.getElementById('datacheckemails-year');
-
-  if (!rankingSelect || !yearSelect) return;
-
-  const rankings = [
-    'Global MBA',
-    'Executive MBA',
-    'MiM',
-    'MiF',
-    'Online MBA',
-    'Executive Education'
-  ];
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 6 }, (_, i) => currentYear + 1 - i);
-
-  rankingSelect.innerHTML = rankings
-    .map(x => `<option value="${x}">${x}</option>`)
-    .join('');
-
-  yearSelect.innerHTML = years
-    .map(x => `<option value="${x}">${x}</option>`)
-    .join('');
-}
-
-
 async function handleDataCheckEmailUpload(input) {
   const file = input.files[0];
 
@@ -198,6 +170,3 @@ function downloadDataCheckEmails() {
     'data_check_emails.xlsx'
   );
 }
-
-
-document.addEventListener('DOMContentLoaded', initDataCheckEmails);
