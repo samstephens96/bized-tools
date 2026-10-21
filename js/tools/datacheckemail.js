@@ -562,7 +562,7 @@ Please make any changes in your online survey and email us exactly what these ch
 
       const emailSubject =
         `Financial Times ${ranking} ${year} - ` +
-        `please - check your data - ${schoolName}`;
+        `please check your data - ${schoolName}`;
 
 
       return {
