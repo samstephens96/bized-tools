@@ -103,31 +103,95 @@ function generateDataCheckEmails() {
 
 function renderDataCheckEmailResults() {
   const section = document.getElementById('datacheckemails-results-section');
-  const stats = document.getElementById('datacheckemails-stats-row');
+  const statsRow = document.getElementById('datacheckemails-stats-row');
   const container = document.getElementById('datacheckemails-results');
 
+  if (!dataCheckEmailResults?.length) {
+    section.classList.add('hidden');
+    return;
+  }
+
   section.classList.remove('hidden');
-  stats.innerHTML = `
+
+  statsRow.innerHTML = `
     <div class="stat-card">
-      <div class="stat-value">${dataCheckEmailResults.length}</div>
+      <div class="stat-num">${dataCheckEmailResults.length}</div>
       <div class="stat-label">Emails generated</div>
     </div>
   `;
 
   container.innerHTML = `
     <div class="card">
-      <p class="section-label">Generated emails</p>
-      <button type="button" class="btn-primary" onclick="downloadDataCheckEmails()">
-        Download emails
-      </button>
+      <div class="card-header">
+        <span>Data check emails</span>
+        <span class="badge">${dataCheckEmailResults.length}</span>
+      </div>
+
+      <div class="email-list">
+        ${dataCheckEmailResults.map((item, index) => `
+          <div class="email-item">
+
+            <div class="email-item-header">
+              <strong>${escapeDataCheckHtml(item.school_name)}</strong>
+
+              <button
+                type="button"
+                class="copy-name-btn"
+                data-email-index="${index}">
+                Copy email
+              </button>
+            </div>
+
+            <pre class="email-body">${escapeDataCheckHtml(item.email_body)}</pre>
+
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
+
+  container.querySelectorAll('[data-email-index]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const index = Number(button.dataset.emailIndex);
+      const email = dataCheckEmailResults[index];
+
+      await copyDataCheckEmail(email.email_body, button);
+    });
+  });
+
+  section.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
 }
 
-function downloadDataCheckEmails() {
-  if (!dataCheckEmailResults?.length) return;
-  const worksheet = XLSX.utils.json_to_sheet(dataCheckEmailResults);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data check emails');
-  XLSX.writeFile(workbook, 'data_check_emails.xlsx');
+function escapeDataCheckHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
+
+
+async function copyDataCheckEmail(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+
+    const original = button.textContent;
+
+    button.textContent = 'Copied!';
+    button.disabled = true;
+
+    setTimeout(() => {
+      button.textContent = original;
+      button.disabled = false;
+    }, 1500);
+
+  } catch (error) {
+    console.error('Could not copy email:', error);
+    alert('Could not copy email to clipboard.');
+  }
+}
+
