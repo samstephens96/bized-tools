@@ -468,29 +468,65 @@ function generateDataCheckEmails() {
         )
       */
 
-      const checks = checkFields
+        const checks = [];
+        const seenChecks = new Set();
+
+        checkFields
         .filter(fieldName =>
-          dataCheckValuePresent(
+            dataCheckValuePresent(
             mappedRow[fieldName]
-          )
+            )
         )
 
-        .map(fieldName => {
+        .forEach(fieldName => {
+            let question;
 
-          /*
-            criteria_grad columns use the actual
-            value in the school's row.
-          */
-
-          if (
+            if (
             fieldName.startsWith(
-              'criteria_grad'
+                'criteria_grad'
             )
-          ) {
-            return String(
-              mappedRow[fieldName]
+            ) {
+            question = String(
+                mappedRow[fieldName]
             ).trim();
-          }
+
+            } else {
+            question = String(
+                checkDict[fieldName] ?? ''
+            ).trim();
+            }
+
+            if (!question) {
+            return;
+            }
+
+            /*
+            Duplicate Excel headings can be renamed during import:
+
+            Question?
+            Question?_1
+            Question?_2
+
+            Strip that generated suffix when comparing questions.
+            */
+
+            const comparisonQuestion = question
+            .replace(/_\d+$/, '')
+            .trim();
+
+            if (seenChecks.has(comparisonQuestion)) {
+            return;
+            }
+
+            seenChecks.add(comparisonQuestion);
+
+            /*
+            Display the cleaned question as well, so _1/_2 etc.
+            never appear in the email.
+            */
+
+            checks.push(comparisonQuestion);
+        });
 
 
           /*
