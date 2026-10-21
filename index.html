@@ -268,129 +268,82 @@
 
     </div>
 
-    </div>
-</div>
+    <!-- Data check emails -->
+    <div id="panel-datacheckemails" class="tool-panel" role="tabpanel">
 
-<!-- Data check emails -->
-<div id="panel-datacheckemails" class="tool-panel" role="tabpanel">
+      <div class="card" id="datacheckemails-upload-card">
+        <p class="section-label">Step 1 — Upload spreadsheet</p>
 
-  <!-- Step 1: Upload -->
-  <div class="card">
-    <p class="section-label">Step 1 — Upload spreadsheet</p>
+        <div class="upload-zone" id="datacheckemails-drop-zone">
+          <svg width="32" height="32" fill="none" stroke="currentColor"
+               stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+          <div class="uz-title">Drop your data check file here, or click to browse</div>
+          <div class="uz-hint">Supports .xlsx, .xls and .csv</div>
+        </div>
 
-    <label class="drop-zone" id="datacheckemails-drop-zone">
-      <input
-        type="file"
-        id="datacheckemails-file"
-        accept=".xlsx,.xls,.csv"
-        onchange="handleDataCheckEmailUpload(this)"
-        hidden
-      >
-
-      <div class="drop-zone-icon">
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 16V4"></path>
-          <path d="M7 9l5-5 5 5"></path>
-          <path d="M5 15v4h14v-4"></path>
-        </svg>
+        <input type="file" id="datacheckemails-file-input" accept=".xlsx,.xls,.csv" />
       </div>
 
-      <div class="drop-zone-title">
-        Drop your data check file here, or click to browse
+      <div class="card hidden" id="datacheckemails-config-card">
+        <p class="section-label">Step 2 — Email details</p>
+
+        <div id="datacheckemails-file-badge-area"></div>
+
+        <div class="col-map-grid">
+          <div class="field-group">
+            <label>Ranking</label>
+            <select id="datacheckemails-ranking">
+              <option value="">Select ranking</option>
+              <option value="Global MBA">Global MBA</option>
+              <option value="Executive MBA">Executive MBA</option>
+              <option value="Masters in Management">Masters in Management</option>
+              <option value="Masters in Finance">Masters in Finance</option>
+              <option value="Online MBA">Online MBA</option>
+              <option value="Executive Education">Executive Education</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Year</label>
+            <select id="datacheckemails-year">
+              <option value="">Select year</option>
+              <option value="2027">2027</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Timeline link</label>
+            <input type="text" id="datacheckemails-link" placeholder="Enter ranking timeline link" />
+          </div>
+
+          <div class="field-group">
+            <label>Deadline</label>
+            <input type="date" id="datacheckemails-deadline" />
+          </div>
+        </div>
+
+        <div class="banner banner-danger hidden" id="datacheckemails-err-banner">
+          <span id="datacheckemails-err-text"></span>
+        </div>
+
+        <button class="btn-primary" id="datacheckemails-run-btn" onclick="generateDataCheckEmails()">
+          Generate emails
+        </button>
       </div>
 
-      <div class="drop-zone-subtitle">
-        Supports .xlsx, .xls and .csv
-      </div>
-
-      <div
-        id="datacheckemails-file-name"
-        class="file-name">
-      </div>
-    </label>
-  </div>
-
-
-  <!-- Step 2: Email details -->
-  <div class="card">
-    <p class="section-label">Step 2 — Email details</p>
-
-    <div class="col-map-grid">
-
-      <div class="field-group">
-        <label for="datacheckemails-ranking">Ranking</label>
-
-        <select id="datacheckemails-ranking">
-          <option value="">Select ranking</option>
-          <option value="Global MBA">Global MBA</option>
-          <option value="Executive MBA">Executive MBA</option>
-          <option value="Masters in Management">Masters in Management</option>
-          <option value="Masters in Finance">Masters in Finance</option>
-          <option value="Online MBA">Online MBA</option>
-          <option value="Executive Education">Executive Education</option>
-        </select>
-      </div>
-
-      <div class="field-group">
-        <label for="datacheckemails-year">Year</label>
-
-        <select id="datacheckemails-year">
-          <option value="">Select year</option>
-          <option value="2027">2027</option>
-          <option value="2026">2026</option>
-          <option value="2025">2025</option>
-        </select>
-      </div>
-
-      <div class="field-group">
-        <label for="datacheckemails-link">Timeline link</label>
-
-        <input
-          type="text"
-          id="datacheckemails-link"
-          placeholder="Enter ranking timeline link"
-        >
-      </div>
-
-      <div class="field-group">
-        <label for="datacheckemails-deadline">Deadline</label>
-
-        <input
-          type="date"
-          id="datacheckemails-deadline"
-        >
+      <div class="hidden" id="datacheckemails-results-section">
+        <div class="stats-row" id="datacheckemails-stats-row"></div>
+        <div id="datacheckemails-results"></div>
       </div>
 
     </div>
+
   </div>
-
-
-  <!-- Step 3: Generate -->
-  <div class="card">
-    <p class="section-label">Step 3 — Generate emails</p>
-
-    <div class="action-row">
-      <button
-        type="button"
-        class="btn primary"
-        onclick="generateDataCheckEmails()">
-        Generate emails
-      </button>
-    </div>
-
-    <div id="datacheckemails-results"></div>
-  </div>
-
-</div>
 
   <script src="js/app.js"></script>
   <script src="js/tools/checker.js"></script>

@@ -235,6 +235,7 @@ body {
    ================================================================ */
 select,
 input[type="text"],
+input[type="date"],
 textarea {
   width: 100%;
   padding: 8px 10px;
@@ -251,6 +252,7 @@ textarea {
 
 select:focus,
 input[type="text"]:focus,
+input[type="date"]:focus,
 textarea:focus {
   border-color: var(--brand-dark);
   box-shadow: 0 0 0 3px rgba(243, 222, 205, 0.5);
@@ -865,4 +867,8 @@ input[type="file"] {
   .ranking-links-wide {
     grid-column: auto;
   }
+}
+/* Data check emails: keep native calendar control while matching form styling */
+input[type="date"] {
+  appearance: auto;
 }
