@@ -37,7 +37,21 @@ function generateDataCheckEmails() {
   const ranking = document.getElementById('datacheckemails-ranking').value;
   const year = document.getElementById('datacheckemails-year').value;
   const link = document.getElementById('datacheckemails-link').value.trim();
-  const deadline = document.getElementById('datacheckemails-deadline').value.trim();
+  const deadlineValue =
+    document.getElementById('datacheckemails-deadline').value;
+
+    let deadline = '';
+
+    if (deadlineValue) {
+    deadline = new Date(
+        `${deadlineValue}T00:00:00`
+    ).toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    }
 
   /*
    * Equivalent to:
@@ -169,4 +183,36 @@ function downloadDataCheckEmails() {
     workbook,
     'data_check_emails.xlsx'
   );
+}
+
+const dataCheckDropZone =
+  document.getElementById('datacheckemails-drop-zone');
+
+const dataCheckFileInput =
+  document.getElementById('datacheckemails-file');
+
+if (dataCheckDropZone && dataCheckFileInput) {
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dataCheckDropZone.addEventListener(eventName, e => {
+      e.preventDefault();
+      dataCheckDropZone.classList.add('drag-over');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dataCheckDropZone.addEventListener(eventName, e => {
+      e.preventDefault();
+      dataCheckDropZone.classList.remove('drag-over');
+    });
+  });
+
+  dataCheckDropZone.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+
+    if (!files.length) return;
+
+    dataCheckFileInput.files = files;
+    handleDataCheckEmailUpload(dataCheckFileInput);
+  });
 }
