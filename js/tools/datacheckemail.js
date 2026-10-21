@@ -525,28 +525,15 @@ function generateDataCheckEmails() {
             never appear in the email.
             */
 
-            checks.push(comparisonQuestion);
+        checks.push(comparisonQuestion);
         });
 
 
-          /*
-            All other fields use the original
-            Excel question heading.
-          */
-
-          return String(
-            checkDict[fieldName] ?? ''
-          ).trim();
-        })
-
-        .filter(Boolean);
-
-
-      /*
+        /*
         Python:
 
-          "\n\n".join(...)
-      */
+            "\n\n".join(...)
+        */
 
       const questions =
         checks.join('\n\n');
