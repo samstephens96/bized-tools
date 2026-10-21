@@ -572,12 +572,15 @@ Please make any changes in your online survey and email us exactly what these ch
 `;
 
 
-      return {
+      const emailSubject =
+        `Financial Times ${ranking} ${year} - please - check your data - ${schoolName}`;
+
+    return {
         school_name: schoolName,
+        email_subject: emailSubject,
         email_body: emailBody,
         check_count: checks.length
-      };
-    })
+    };
 
 
     /*
@@ -624,18 +627,173 @@ function renderDataCheckEmailResults() {
     'datacheckemails-results'
   );
 
-
-  if (
-    !section ||
-    !statsRow ||
-    !container
-  ) {
+  if (!section || !statsRow || !container) {
     console.error(
       'Data check email results elements are missing.'
     );
-
     return;
   }
+
+
+  /* No results */
+
+  if (!dataCheckEmailResults.length) {
+    statsRow.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Emails generated</div>
+      </div>
+    `;
+
+    container.innerHTML = `
+      <div class="card">
+        <p>No data check emails were required.</p>
+      </div>
+    `;
+
+    section.classList.remove('hidden');
+    return;
+  }
+
+
+  /* Summary */
+
+  statsRow.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num">
+        ${dataCheckEmailResults.length}
+      </div>
+
+      <div class="stat-label">
+        Emails generated
+      </div>
+    </div>
+  `;
+
+
+  /*
+    Each school gets its own card/bubble.
+  */
+
+  container.innerHTML = `
+    <div class="data-check-email-list">
+
+      ${dataCheckEmailResults.map((item, index) => `
+        <div class="card data-check-email-card">
+
+          <div class="data-check-email-header">
+
+            <div>
+              <div class="data-check-email-school">
+                ${escapeDataCheckHtml(item.school_name)}
+              </div>
+
+              <div class="muted">
+                ${item.check_count}
+                ${item.check_count === 1 ? 'check' : 'checks'}
+              </div>
+            </div>
+
+            <div class="data-check-email-actions">
+
+              <button
+                type="button"
+                class="copy-name-btn"
+                data-copy-subject="${index}">
+                Copy subject
+              </button>
+
+              <button
+                type="button"
+                class="copy-name-btn"
+                data-copy-email="${index}">
+                Copy email
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="data-check-email-subject">
+            <span class="muted">Subject</span>
+
+            <div>
+              ${escapeDataCheckHtml(item.email_subject)}
+            </div>
+          </div>
+
+
+          <pre class="email-body">${escapeDataCheckHtml(
+            item.email_body
+          )}</pre>
+
+        </div>
+      `).join('')}
+
+    </div>
+  `;
+
+
+  /* Copy subject */
+
+  container
+    .querySelectorAll('[data-copy-subject]')
+    .forEach(button => {
+
+      button.addEventListener('click', async event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const index = Number(
+          button.dataset.copySubject
+        );
+
+        const email = dataCheckEmailResults[index];
+
+        if (!email) return;
+
+        await copyDataCheckText(
+          email.email_subject,
+          button
+        );
+      });
+    });
+
+
+  /* Copy email */
+
+  container
+    .querySelectorAll('[data-copy-email]')
+    .forEach(button => {
+
+      button.addEventListener('click', async event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const index = Number(
+          button.dataset.copyEmail
+        );
+
+        const email = dataCheckEmailResults[index];
+
+        if (!email) return;
+
+        await copyDataCheckText(
+          email.email_body,
+          button
+        );
+      });
+    });
+
+
+  section.classList.remove('hidden');
+
+  section.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+}
 
 
   /* ----------------------------------------------------------
@@ -826,7 +984,7 @@ function renderDataCheckEmailResults() {
    COPY EMAIL
    ============================================================ */
 
-async function copyDataCheckEmail(
+async function copyDataCheckText(
   text,
   button
 ) {
