@@ -3,12 +3,12 @@
    ============================================================ */
 
 let dataCheckEmailData = null;
-let dataCheckEmailResults = null;
+let dataCheckEmailResults = [];
 
 
-/* ------------------------------------------------------------
-   Helpers
-   ------------------------------------------------------------ */
+/* ============================================================
+   HELPERS
+   ============================================================ */
 
 function escapeDataCheckHtml(value) {
   return String(value ?? '')
@@ -59,15 +59,34 @@ function hideDataCheckError() {
 }
 
 
-/* ------------------------------------------------------------
-   Spreadsheet upload
+/* ============================================================
+   FILE UPLOAD
 
-   Uses the same shared upload system as the other tools.
-   ------------------------------------------------------------ */
+   This matches setupSpreadsheetUpload() in your app.js.
+
+   app.js returns:
+
+   {
+     file,
+     rows,
+     headers
+   }
+
+   rows is an array of objects because app.js uses
+   XLSX.utils.sheet_to_json().
+   ============================================================ */
 
 setupSpreadsheetUpload({
   dropZoneId: 'datacheckemails-drop-zone',
-  fileInputId: 'datacheckemails-file',
+
+  /*
+    This MUST match your current index.html.
+
+    Your HTML uses:
+    id="datacheckemails-file-input"
+  */
+  fileInputId: 'datacheckemails-file-input',
+
 
   onStart: () => {
     hideDataCheckError();
@@ -81,7 +100,8 @@ setupSpreadsheetUpload({
     }
   },
 
-  onLoaded: (data, file) => {
+
+  onLoaded: ({ file, rows, headers }) => {
     const zone = document.getElementById(
       'datacheckemails-drop-zone'
     );
@@ -90,17 +110,30 @@ setupSpreadsheetUpload({
       zone.classList.remove('loading');
     }
 
-    /*
-      setupSpreadsheetUpload returns the spreadsheet data.
-      Keep it exactly as supplied so that we retain:
 
-      Row 0 = Excel column headings / question text
-      Row 1 = internal field names
-      Row 2+ = school data
+    /*
+      Save the structure returned by app.js.
+
+      headers:
+        Original Excel column headings / question text
+
+      rows[0]:
+        First data row containing internal names such as
+        school_name, criteria_grad..., etc.
+
+      rows[1:]:
+        Actual school rows
     */
 
-    dataCheckEmailData = data;
-    dataCheckEmailResults = null;
+    dataCheckEmailData = {
+      headers,
+      rows
+    };
+
+    dataCheckEmailResults = [];
+
+
+    /* Show uploaded filename */
 
     const badgeArea = document.getElementById(
       'datacheckemails-file-badge-area'
@@ -113,6 +146,9 @@ setupSpreadsheetUpload({
         </div>
       `;
     }
+
+
+    /* Move from Step 1 to Step 2 */
 
     const uploadCard = document.getElementById(
       'datacheckemails-upload-card'
@@ -139,6 +175,7 @@ setupSpreadsheetUpload({
     }
   },
 
+
   onError: error => {
     const zone = document.getElementById(
       'datacheckemails-drop-zone'
@@ -161,9 +198,9 @@ setupSpreadsheetUpload({
 });
 
 
-/* ------------------------------------------------------------
-   Deadline formatting
-   ------------------------------------------------------------ */
+/* ============================================================
+   DEADLINE
+   ============================================================ */
 
 function getDataCheckDeadline() {
   const input = document.getElementById(
@@ -176,37 +213,56 @@ function getDataCheckDeadline() {
     return '';
   }
 
+
   /*
-    Adding T00:00:00 prevents the browser treating the date
-    as UTC and potentially shifting it by one day.
+    Using T00:00:00 avoids timezone changes moving the
+    selected date backwards or forwards by a day.
   */
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(
+    `${value}T00:00:00`
+  );
 
-  return date.toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+
+  return date.toLocaleDateString(
+    'en-GB',
+    {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }
+  );
 }
 
 
-/* ------------------------------------------------------------
-   Generate emails
+/* ============================================================
+   GENERATE EMAILS
 
-   Browser equivalent of:
+   Equivalent to:
 
-   data_check_email(df, ranking, year, link, deadline)
-   ------------------------------------------------------------ */
+   def data_check_email(
+       df,
+       ranking,
+       year,
+       link,
+       deadline
+   )
+   ============================================================ */
 
 function generateDataCheckEmails() {
   hideDataCheckError();
 
+
+  /* ----------------------------------------------------------
+     Validate uploaded data
+     ---------------------------------------------------------- */
+
   if (
     !dataCheckEmailData ||
-    !Array.isArray(dataCheckEmailData) ||
-    dataCheckEmailData.length < 3
+    !Array.isArray(dataCheckEmailData.headers) ||
+    !Array.isArray(dataCheckEmailData.rows) ||
+    dataCheckEmailData.rows.length < 2
   ) {
     showDataCheckError(
       'Please upload a valid data check spreadsheet first.'
@@ -215,25 +271,31 @@ function generateDataCheckEmails() {
     return;
   }
 
+
+  /* ----------------------------------------------------------
+     Get email settings
+     ---------------------------------------------------------- */
+
   const ranking = document
     .getElementById('datacheckemails-ranking')
     ?.value
     ?.trim();
+
 
   const year = document
     .getElementById('datacheckemails-year')
     ?.value
     ?.trim();
 
+
   const link = document
     .getElementById('datacheckemails-link')
     ?.value
     ?.trim();
 
+
   const deadline = getDataCheckDeadline();
 
-
-  /* Validation */
 
   if (!ranking) {
     showDataCheckError(
@@ -243,6 +305,7 @@ function generateDataCheckEmails() {
     return;
   }
 
+
   if (!year) {
     showDataCheckError(
       'Please select a year.'
@@ -251,6 +314,7 @@ function generateDataCheckEmails() {
     return;
   }
 
+
   if (!link) {
     showDataCheckError(
       'Please enter the ranking timeline link.'
@@ -258,6 +322,7 @@ function generateDataCheckEmails() {
 
     return;
   }
+
 
   if (!deadline) {
     showDataCheckError(
@@ -268,8 +333,8 @@ function generateDataCheckEmails() {
   }
 
 
-  /* ----------------------------------------------------------
-     Spreadsheet structure
+  /* ==========================================================
+     RECREATE THE PYTHON DATAFRAME LOGIC
 
      Python:
 
@@ -282,43 +347,73 @@ function generateDataCheckEmails() {
        df = df.drop(0).copy()
 
        df.columns = question_row
+     ========================================================== */
 
 
-     In the raw spreadsheet:
+  /*
+    Original Excel headings.
 
-       dataCheckEmailData[0]
-         = original Excel headers / question text
+    These contain the actual question text.
+  */
 
-       dataCheckEmailData[1]
-         = first dataframe row / internal field names
-
-       dataCheckEmailData[2:]
-         = school data
-     ---------------------------------------------------------- */
-
-  const questionText = dataCheckEmailData[0];
-  const fieldNames = dataCheckEmailData[1];
-  const rows = dataCheckEmailData.slice(2);
+  const originalHeaders =
+    dataCheckEmailData.headers;
 
 
-  if (
-    !Array.isArray(questionText) ||
-    !Array.isArray(fieldNames)
-  ) {
-    showDataCheckError(
-      'The spreadsheet does not have the expected structure.'
-    );
+  /*
+    First data row.
 
-    return;
-  }
+    Because app.js uses sheet_to_json(), this is an object
+    whose keys are the original Excel headings.
+
+    Its values contain:
+
+      school_name
+      criteria_grad...
+      etc.
+  */
+
+  const questionRow =
+    dataCheckEmailData.rows[0];
+
+
+  /*
+    Equivalent of:
+
+      df.columns = question_row
+
+    Create a lookup from each internal field name to its
+    original Excel question heading.
+
+    This is the JavaScript equivalent of:
+
+      check_dict = dict(
+          zip(question_row, df.columns)
+      )
+  */
+
+  const checkDict = {};
+
+  const fieldNames = [];
+
+
+  originalHeaders.forEach(header => {
+    const fieldName = String(
+      questionRow[header] ?? ''
+    ).trim();
+
+    fieldNames.push(fieldName);
+
+    if (fieldName) {
+      checkDict[fieldName] = header;
+    }
+  });
 
 
   /* Find school_name */
 
-  const schoolIndex = fieldNames.findIndex(
-    value =>
-      String(value ?? '').trim() === 'school_name'
-  );
+  const schoolIndex =
+    fieldNames.indexOf('school_name');
 
 
   if (schoolIndex === -1) {
@@ -333,80 +428,117 @@ function generateDataCheckEmails() {
   /*
     Python:
 
-    check_cols = df.columns[
-        df.columns.get_loc('school_name') + 1:
-    ].tolist()
+      check_cols = df.columns[
+          df.columns.get_loc('school_name') + 1:
+      ].tolist()
   */
 
-  const checkIndexes = [];
-
-  for (
-    let i = schoolIndex + 1;
-    i < fieldNames.length;
-    i++
-  ) {
-    checkIndexes.push(i);
-  }
+  const checkFields =
+    fieldNames.slice(
+      schoolIndex + 1
+    );
 
 
-  /* ----------------------------------------------------------
-     Build results
-     ---------------------------------------------------------- */
+  /*
+    Remove the first data row.
 
-  dataCheckEmailResults = rows
-    .filter(row => {
-      if (!Array.isArray(row)) {
-        return false;
-      }
+    Python:
 
-      return row.some(dataCheckValuePresent);
-    })
+      df = df.drop(0).copy()
+  */
 
+  const schoolRows =
+    dataCheckEmailData.rows.slice(1);
+
+
+  /* ==========================================================
+     BUILD EACH EMAIL
+     ========================================================== */
+
+  dataCheckEmailResults = schoolRows
     .map(row => {
-      const schoolName = row[schoolIndex];
+
+      /*
+        Convert this object row from original headings
+        to the internal field names from questionRow.
+
+        Equivalent to:
+
+          df.columns = question_row
+      */
+
+      const mappedRow = {};
+
+
+      originalHeaders.forEach(
+        (header, index) => {
+
+          const fieldName =
+            fieldNames[index];
+
+          if (fieldName) {
+            mappedRow[fieldName] =
+              row[header];
+          }
+        }
+      );
+
+
+      const schoolName =
+        mappedRow.school_name;
+
 
       /*
         Python:
 
-        [
+        df['checks'] = df.apply(
+          lambda row: [
             (
-                f"{row[col]}"
-                if str(col).startswith('criteria_grad')
-                else check_dict[col]
+              f"{row[col]}"
+              if str(col).startswith(
+                'criteria_grad'
+              )
+              else check_dict[col]
             )
             for col in check_cols
             if pd.notnull(row[col])
-        ]
+          ],
+          axis=1
+        )
       */
 
-      const checks = checkIndexes
-        .filter(index =>
-          dataCheckValuePresent(row[index])
+      const checks = checkFields
+        .filter(fieldName =>
+          dataCheckValuePresent(
+            mappedRow[fieldName]
+          )
         )
 
-        .map(index => {
-          const fieldName = String(
-            fieldNames[index] ?? ''
-          ).trim();
+        .map(fieldName => {
 
           /*
-            criteria_grad fields use the actual
-            value in the school's row.
+            criteria_grad columns use the actual
+            cell value.
           */
 
           if (
-            fieldName.startsWith('criteria_grad')
+            fieldName.startsWith(
+              'criteria_grad'
+            )
           ) {
-            return String(row[index]).trim();
+            return String(
+              mappedRow[fieldName]
+            ).trim();
           }
 
+
           /*
-            All other checks return the original
-            Excel column heading / question text.
+            All other fields use the original
+            Excel question heading.
           */
 
           return String(
-            questionText[index] ?? ''
+            checkDict[fieldName] ?? ''
           ).trim();
         })
 
@@ -416,14 +548,15 @@ function generateDataCheckEmails() {
       /*
         Python:
 
-        "\n\n".join(...)
+          "\n\n".join(...)
       */
 
-      const questions = checks.join('\n\n');
+      const questions =
+        checks.join('\n\n');
 
 
       /*
-        Same email template as Python.
+        Same email template as your Python function.
       */
 
       const emailBody =
@@ -446,9 +579,23 @@ Please make any changes in your online survey and email us exactly what these ch
       };
     })
 
+
     /*
-      There is no point displaying schools where
-      there are no data checks.
+      Don't show completely blank spreadsheet rows.
+    */
+
+    .filter(item =>
+      dataCheckValuePresent(
+        item.school_name
+      )
+    )
+
+
+    /*
+      Only show schools that actually have checks.
+
+      If you want to reproduce the Python output literally,
+      including schools with zero checks, remove this filter.
     */
 
     .filter(item =>
@@ -460,9 +607,9 @@ Please make any changes in your online survey and email us exactly what these ch
 }
 
 
-/* ------------------------------------------------------------
-   Render emails
-   ------------------------------------------------------------ */
+/* ============================================================
+   RENDER RESULTS
+   ============================================================ */
 
 function renderDataCheckEmailResults() {
   const section = document.getElementById(
@@ -478,7 +625,11 @@ function renderDataCheckEmailResults() {
   );
 
 
-  if (!section || !statsRow || !container) {
+  if (
+    !section ||
+    !statsRow ||
+    !container
+  ) {
     console.error(
       'Data check email results elements are missing.'
     );
@@ -487,17 +638,23 @@ function renderDataCheckEmailResults() {
   }
 
 
-  if (!dataCheckEmailResults?.length) {
-    section.classList.remove('hidden');
+  /* ----------------------------------------------------------
+     No results
+     ---------------------------------------------------------- */
 
+  if (!dataCheckEmailResults.length) {
     statsRow.innerHTML = `
       <div class="stat-card">
-        <div class="stat-num">0</div>
+        <div class="stat-num">
+          0
+        </div>
+
         <div class="stat-label">
           Emails generated
         </div>
       </div>
     `;
+
 
     container.innerHTML = `
       <div class="card">
@@ -507,14 +664,22 @@ function renderDataCheckEmailResults() {
       </div>
     `;
 
+
+    section.classList.remove(
+      'hidden'
+    );
+
     return;
   }
 
 
-  /* Summary */
+  /* ----------------------------------------------------------
+     Stats
+     ---------------------------------------------------------- */
 
   statsRow.innerHTML = `
     <div class="stat-card">
+
       <div class="stat-num">
         ${dataCheckEmailResults.length}
       </div>
@@ -522,63 +687,78 @@ function renderDataCheckEmailResults() {
       <div class="stat-label">
         Emails generated
       </div>
+
     </div>
   `;
 
 
-  /* Emails */
+  /* ----------------------------------------------------------
+     Email cards
+     ---------------------------------------------------------- */
 
   container.innerHTML = `
     <div class="card">
 
       <div class="card-header">
-        <span>Data check emails</span>
+
+        <span>
+          Data check emails
+        </span>
 
         <span class="badge">
           ${dataCheckEmailResults.length}
         </span>
+
       </div>
+
 
       <div class="email-list">
 
         ${dataCheckEmailResults
-          .map((item, index) => `
-            <div class="email-item">
+          .map(
+            (item, index) => `
+              <div class="email-item">
 
-              <div class="email-item-header">
+                <div class="email-item-header">
 
-                <div>
-                  <strong>
-                    ${escapeDataCheckHtml(
-                      item.school_name
-                    )}
-                  </strong>
+                  <div>
 
-                  <div class="muted">
-                    ${item.check_count}
-                    ${
-                      item.check_count === 1
-                        ? 'check'
-                        : 'checks'
-                    }
+                    <strong>
+                      ${escapeDataCheckHtml(
+                        item.school_name
+                      )}
+                    </strong>
+
+                    <div class="muted">
+                      ${item.check_count}
+                      ${
+                        item.check_count === 1
+                          ? 'check'
+                          : 'checks'
+                      }
+                    </div>
+
                   </div>
+
+
+                  <button
+                    type="button"
+                    class="copy-name-btn"
+                    data-email-index="${index}"
+                  >
+                    Copy email
+                  </button>
+
                 </div>
 
-                <button
-                  type="button"
-                  class="copy-name-btn"
-                  data-email-index="${index}">
-                  Copy email
-                </button>
+
+                <pre class="email-body">${escapeDataCheckHtml(
+                  item.email_body
+                )}</pre>
 
               </div>
-
-              <pre class="email-body">${escapeDataCheckHtml(
-                item.email_body
-              )}</pre>
-
-            </div>
-          `)
+            `
+          )
           .join('')}
 
       </div>
@@ -587,10 +767,14 @@ function renderDataCheckEmailResults() {
   `;
 
 
-  /* Copy buttons */
+  /* ----------------------------------------------------------
+     Copy buttons
+     ---------------------------------------------------------- */
 
   container
-    .querySelectorAll('[data-email-index]')
+    .querySelectorAll(
+      '[data-email-index]'
+    )
     .forEach(button => {
 
       button.addEventListener(
@@ -600,16 +784,22 @@ function renderDataCheckEmailResults() {
           event.preventDefault();
           event.stopPropagation();
 
+
           const index = Number(
             button.dataset.emailIndex
           );
 
+
           const email =
-            dataCheckEmailResults[index];
+            dataCheckEmailResults[
+              index
+            ];
+
 
           if (!email) {
             return;
           }
+
 
           await copyDataCheckEmail(
             email.email_body,
@@ -620,10 +810,10 @@ function renderDataCheckEmailResults() {
     });
 
 
-  section.classList.remove('hidden');
+  section.classList.remove(
+    'hidden'
+  );
 
-
-  /* Scroll results into view */
 
   section.scrollIntoView({
     behavior: 'smooth',
@@ -632,17 +822,22 @@ function renderDataCheckEmailResults() {
 }
 
 
-/* ------------------------------------------------------------
-   Copy email
-   ------------------------------------------------------------ */
+/* ============================================================
+   COPY EMAIL
+   ============================================================ */
 
-async function copyDataCheckEmail(text, button) {
-  const originalText = button.textContent;
+async function copyDataCheckEmail(
+  text,
+  button
+) {
+  const originalText =
+    button.textContent;
+
 
   try {
 
     /*
-      Preferred clipboard API.
+      Normal modern-browser clipboard API.
     */
 
     if (
@@ -650,33 +845,52 @@ async function copyDataCheckEmail(text, button) {
       window.isSecureContext
     ) {
 
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(
+        text
+      );
 
     } else {
 
       /*
-        Fallback for environments where the
-        Clipboard API is unavailable.
+        Fallback for browsers/environments where
+        navigator.clipboard isn't available.
       */
 
       const textarea =
-        document.createElement('textarea');
+        document.createElement(
+          'textarea'
+        );
+
 
       textarea.value = text;
 
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      textarea.style.top = '-9999px';
+      textarea.style.position =
+        'fixed';
 
-      document.body.appendChild(textarea);
+      textarea.style.left =
+        '-9999px';
+
+      textarea.style.top =
+        '-9999px';
+
+
+      document.body.appendChild(
+        textarea
+      );
+
 
       textarea.focus();
       textarea.select();
 
+
       const success =
-        document.execCommand('copy');
+        document.execCommand(
+          'copy'
+        );
+
 
       textarea.remove();
+
 
       if (!success) {
         throw new Error(
@@ -686,12 +900,16 @@ async function copyDataCheckEmail(text, button) {
     }
 
 
-    button.textContent = 'Copied!';
+    button.textContent =
+      'Copied!';
+
     button.disabled = true;
 
 
     setTimeout(() => {
-      button.textContent = originalText;
+      button.textContent =
+        originalText;
+
       button.disabled = false;
     }, 1500);
 
@@ -703,11 +921,14 @@ async function copyDataCheckEmail(text, button) {
       error
     );
 
-    button.textContent = 'Copy failed';
+
+    button.textContent =
+      'Copy failed';
 
 
     setTimeout(() => {
-      button.textContent = originalText;
+      button.textContent =
+        originalText;
     }, 1500);
   }
 }
